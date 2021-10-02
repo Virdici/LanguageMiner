@@ -72,6 +72,7 @@ class _TextDialogState extends State<AddTextDialog> {
 
   Widget buildTitle() => TextFormField(
         controller: titleController,
+        keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
           border: OutlineInputBorder(),
           hintText: 'Enter Title',
