@@ -79,7 +79,12 @@ class _TextsPageState extends State<TextsPage> {
           children: [
             Text(date),
             SizedBox(width: 26),
-            Text('Words: ' + text.contents.split(' ').length.toString()),
+            Text('Words: ' +
+                text.contents
+                    .split(RegExp(
+                        r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)"))
+                    .length
+                    .toString()),
           ],
         ),
         children: [

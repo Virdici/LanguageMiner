@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:language_miner/model/wordModel.dart';
-import 'package:language_miner/page/texts.dart';
-import 'package:language_miner/page/words.dart';
+import 'package:language_miner/page/texts_list.dart';
+import 'package:language_miner/page/words_list.dart';
 import 'package:language_miner/model/textModel.dart';
 
 void main() async {
