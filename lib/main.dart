@@ -27,7 +27,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int pageIndex = 0;
 
-  List<Widget> pages = [WordPg(), TextPg()];
+  List<Widget> pages = [TextPg(), WordPg()];
 
   void onTap(int index) {
     setState(() {
