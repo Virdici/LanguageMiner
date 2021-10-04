@@ -1,5 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:language_miner/Controllers/wordController.dart';
+import 'package:language_miner/model/wordModel.dart';
 import '../model/textModel.dart';
 
 class ReadText extends StatefulWidget {
@@ -15,16 +18,21 @@ class _ReadTextState extends State<ReadText> {
   final contentsController = TextEditingController();
   late String content;
   late int paragraphId = -1;
+  late Box box;
   // late ScrollController _scrollController;
 
   int scrollPos = 0;
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
 
+  Future initBox() async {
+    box = await Hive.openBox<WordModel>('words');
+  }
+
   @override
   void initState() {
     super.initState();
-
+    initBox();
     if (widget.text != null) {
       final text = widget.text!;
 
@@ -77,6 +85,7 @@ class _ReadTextState extends State<ReadText> {
     // List<String> words = sentence.split(new RegExp(r"[ ,'„!?.\n]"));
     List<String> words = sentence.split(new RegExp(
         r"\ +|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß ])|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[^a-zA-Z0-9äöüÄÖÜß ])"));
+    late String selectedWord;
     print(words);
     return showModalBottomSheet<void>(
       context: context,
@@ -95,13 +104,14 @@ class _ReadTextState extends State<ReadText> {
                       TextSpan(
                           text: words[i] + ' ',
                           recognizer: new TapGestureRecognizer()
-                            ..onTap = () => {print(words[i])}),
+                            ..onTap = () =>
+                                {print(words[i]), selectedWord = words[i]}),
                   ],
                 )),
                 ElevatedButton(
-                  child: const Text('Close BottomSheet'),
-                  onPressed: () => print(sentence),
-                )
+                    child: const Text('Close BottomSheet'),
+                    onPressed: () => WordController.addWord(
+                        selectedWord, 'translation', sentence))
               ],
             ),
           ),
@@ -109,11 +119,4 @@ class _ReadTextState extends State<ReadText> {
       },
     );
   }
-}
-
-class ParagraphClass {
-  int id;
-  List<String> sentences;
-
-  ParagraphClass(this.id, this.sentences);
 }
