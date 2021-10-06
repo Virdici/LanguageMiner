@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:language_miner/Controllers/wordController.dart';
+import 'package:language_miner/Controllers/dictController.dart';
 import 'package:language_miner/model/wordModel.dart';
 import '../model/textModel.dart';
 
@@ -41,7 +41,7 @@ class _ReadTextState extends State<ReadText> {
     }
 
     content = contentsController.text;
-    debugPrint(paragraphsList.toString());
+    // debugPrint(paragraphsList.toString());
   }
 
   @override
@@ -104,14 +104,19 @@ class _ReadTextState extends State<ReadText> {
                       TextSpan(
                           text: words[i] + ' ',
                           recognizer: new TapGestureRecognizer()
-                            ..onTap = () =>
-                                {print(words[i]), selectedWord = words[i]}),
+                            ..onTap = () => {
+                                  print("selected word: " + words[i]),
+                                  selectedWord = words[i]
+                                }),
                   ],
                 )),
                 ElevatedButton(
                     child: const Text('Close BottomSheet'),
-                    onPressed: () => WordController.addWord(
-                        selectedWord, 'translation', sentence))
+                    onPressed: () => {
+                          // WordController.addWord(
+                          //     selectedWord, 'translation', sentence)
+                          DictController.getTerm(selectedWord),
+                        })
               ],
             ),
           ),
