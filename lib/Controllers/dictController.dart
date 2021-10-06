@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:typed_data';
@@ -8,7 +7,7 @@ import 'package:flutter/services.dart';
 class DictController {
   static late Database db;
 
-  static Future getTerm(String term) async {
+  static Future<List<Map<dynamic, dynamic>>> getTerm(String term) async {
     var dbPath = await getDatabasesPath();
     var path = join(dbPath, "new_dict.db");
     var exists = await databaseExists(path);
@@ -31,17 +30,15 @@ class DictController {
 
     db = await openDatabase(path);
     print("is db open: " + db.isOpen.toString());
-    // print(await db.query('definitions',
-    //     columns: ['term', 'definition'], where: 'term = "$term"'));
-    print(await db.rawQuery(
-        'select term,definition from definitions where term like "$term"'));
+
     var data = await db.rawQuery(
         'select term,definition from definitions where term like "$term"');
     await db.close();
+
     print("is db open: " + db.isOpen.toString());
 
-    var firstData = data[0]["definition"].toString();
-    debugPrint(data.toString());
-    debugPrint(firstData);
+    return data;
+    // debugPrint(data.toString());
+    // debugPrint(firstData);
   }
 }

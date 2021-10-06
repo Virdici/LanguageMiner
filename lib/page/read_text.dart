@@ -19,6 +19,7 @@ class _ReadTextState extends State<ReadText> {
   late String content;
   late int paragraphId = -1;
   late Box box;
+  late List<Map<dynamic, dynamic>> dictTerms;
   // late ScrollController _scrollController;
 
   int scrollPos = 0;
@@ -112,10 +113,12 @@ class _ReadTextState extends State<ReadText> {
                 )),
                 ElevatedButton(
                     child: const Text('Close BottomSheet'),
-                    onPressed: () => {
+                    onPressed: () async => {
                           // WordController.addWord(
                           //     selectedWord, 'translation', sentence)
-                          DictController.getTerm(selectedWord),
+                          dictTerms =
+                              await DictController.getTerm(selectedWord),
+                          print(dictTerms)
                         })
               ],
             ),
