@@ -79,7 +79,7 @@ class _TextsPageState extends State<TextsPage> {
           children: [
             Text(date),
             SizedBox(width: 26),
-            Text('Words: ' +
+            Text('Sentences: ' +
                 text.contents
                     .split(RegExp(
                         r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)"))
