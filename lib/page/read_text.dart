@@ -74,7 +74,7 @@ class _ReadTextState extends State<ReadText> {
                     : TextSpan(
                         text: paragraphsList[i] + " ",
                         recognizer: new TapGestureRecognizer()
-                          ..onTap = () => {modal(paragraphsList[i])}),
+                          ..onTap = () => {modalSentence(paragraphsList[i])}),
             ],
           ),
         ),
@@ -82,8 +82,8 @@ class _ReadTextState extends State<ReadText> {
     );
   }
 
-  Future modal(String sentence) {
-    // List<String> words = sentence.split(new RegExp(r"[ ,'„!?.\n]"));
+  Future modalSentence(String sentence) {
+    // split sentence into words and characters
     List<String> words = sentence.split(new RegExp(
         r"\ +|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß ])|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[^a-zA-Z0-9äöüÄÖÜß ])"));
     late String selectedWord;
@@ -105,26 +105,50 @@ class _ReadTextState extends State<ReadText> {
                       TextSpan(
                           text: words[i] + ' ',
                           recognizer: new TapGestureRecognizer()
-                            ..onTap = () => {
+                            ..onTap = () async => {
                                   print("selected word: " + words[i]),
-                                  selectedWord = words[i]
+                                  selectedWord = words[i],
+                                  dictTerms = await DictController.getTerm(
+                                      selectedWord),
+                                  modalDefinitions(dictTerms)
                                 }),
                   ],
                 )),
-                ElevatedButton(
-                    child: const Text('Close BottomSheet'),
-                    onPressed: () async => {
-                          // WordController.addWord(
-                          //     selectedWord, 'translation', sentence)
-                          dictTerms =
-                              await DictController.getTerm(selectedWord),
-                          print(dictTerms)
-                        })
+                // ElevatedButton(
+                //     child: const Text('Close BottomSheet'),
+                //     onPressed: () async => {
+                //           // WordController.addWord(
+                //           //     selectedWord, 'translation', sentence)
+                //           dictTerms =
+                //               await DictController.getTerm(selectedWord),
+                //           print(dictTerms)
+                //         })
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  Future modalDefinitions(List<Map<dynamic, dynamic>> definitions) {
+    return showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            height: 250,
+            color: Colors.grey[500],
+            child: Center(
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                for (var i = 0; i < definitions.length; i++)
+                  Text(definitions[i]['definition'].toString())
+                // Text(definitions.length.toString())
+              ],
+            )),
+          );
+        });
   }
 }
