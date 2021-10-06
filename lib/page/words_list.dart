@@ -83,8 +83,11 @@ class _WordsPageState extends State<WordsPage> {
                         color: Colors.blue,
                         fontSize: 24),
                   ),
-                  Text(
-                    word.translation!,
+                  Container(
+                    child: Text(
+                      word.translation!,
+                      softWrap: true,
+                    ),
                   )
                 ],
               ),
@@ -124,9 +127,9 @@ class _WordsPageState extends State<WordsPage> {
         ));
   }
 
-  @override
-  void dispose() {
-    Hive.close();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   Hive.close();
+  //   super.dispose();
+  // }
 }
