@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:language_miner/Controllers/dictController.dart';
+import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/wordModel.dart';
 import '../model/textModel.dart';
 
@@ -20,6 +21,8 @@ class _ReadTextState extends State<ReadText> {
   late int paragraphId = -1;
   late Box box;
   late List<Map<dynamic, dynamic>> dictTerms;
+  late String selectedWord;
+  late String selectedSentence;
   // late ScrollController _scrollController;
 
   int scrollPos = 0;
@@ -74,7 +77,10 @@ class _ReadTextState extends State<ReadText> {
                     : TextSpan(
                         text: paragraphsList[i] + " ",
                         recognizer: new TapGestureRecognizer()
-                          ..onTap = () => {modalSentence(paragraphsList[i])}),
+                          ..onTap = () => {
+                                selectedSentence = paragraphsList[i],
+                                modalSentence(paragraphsList[i])
+                              }),
             ],
           ),
         ),
@@ -86,44 +92,47 @@ class _ReadTextState extends State<ReadText> {
     // split sentence into words and characters
     List<String> words = sentence.split(new RegExp(
         r"\ +|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß ])|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[^a-zA-Z0-9äöüÄÖÜß ])"));
-    late String selectedWord;
     print(words);
     return showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 250,
+          height: 300,
           color: Colors.grey[500],
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SelectableText.rich(TextSpan(
-                  children: <TextSpan>[
-                    for (var i = 0; i < words.length; i++)
-                      TextSpan(
-                          text: words[i] + ' ',
-                          recognizer: new TapGestureRecognizer()
-                            ..onTap = () async => {
-                                  print("selected word: " + words[i]),
-                                  selectedWord = words[i],
-                                  dictTerms = await DictController.getTerm(
-                                      selectedWord),
-                                  modalDefinitions(dictTerms)
-                                }),
-                  ],
-                )),
-                // ElevatedButton(
-                //     child: const Text('Close BottomSheet'),
-                //     onPressed: () async => {
-                //           // WordController.addWord(
-                //           //     selectedWord, 'translation', sentence)
-                //           dictTerms =
-                //               await DictController.getTerm(selectedWord),
-                //           print(dictTerms)
-                //         })
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SelectableText.rich(TextSpan(
+                    children: <TextSpan>[
+                      for (var i = 0; i < words.length; i++)
+                        TextSpan(
+                            style: TextStyle(fontSize: 24),
+                            text: words[i] + ' ',
+                            recognizer: new TapGestureRecognizer()
+                              ..onTap = () async => {
+                                    print("selected word: " + words[i]),
+                                    selectedWord = words[i],
+                                    dictTerms = await DictController.getTerm(
+                                        selectedWord),
+                                    modalDefinitions(dictTerms)
+                                  }),
+                    ],
+                  )),
+                  // ElevatedButton(
+                  //     child: const Text('Close BottomSheet'),
+                  //     onPressed: () async => {
+                  //           // WordController.addWord(
+                  //           //     selectedWord, 'translation', sentence)
+                  //           dictTerms =
+                  //               await DictController.getTerm(selectedWord),
+                  //           print(dictTerms)
+                  //         })
+                ],
+              ),
             ),
           ),
         );
@@ -136,7 +145,7 @@ class _ReadTextState extends State<ReadText> {
         context: context,
         builder: (BuildContext context) {
           return Container(
-            height: 250,
+            height: 300,
             color: Colors.grey[500],
             child: Center(
                 child: Column(
@@ -144,11 +153,35 @@ class _ReadTextState extends State<ReadText> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 for (var i = 0; i < definitions.length; i++)
-                  Text(definitions[i]['definition'].toString())
+                  // Text(definitions[i]['definition'].toString())
+                  definitionCard(definitions[i])
                 // Text(definitions.length.toString())
               ],
             )),
           );
         });
+  }
+
+  Widget definitionCard(Map<dynamic, dynamic> definition) {
+    String definitionFormated =
+        definition['definition'].toString().replaceAll('<br>', '\n');
+    return GestureDetector(
+      child: Card(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              definitionFormated,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ),
+      ),
+      onTap: () {
+        WordController.addWord(
+            selectedWord, definitionFormated, selectedSentence);
+      },
+    );
   }
 }

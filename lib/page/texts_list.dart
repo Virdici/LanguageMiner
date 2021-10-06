@@ -151,9 +151,9 @@ class _TextsPageState extends State<TextsPage> {
   //   box.add(text);
   // }
 
-  @override
-  void dispose() {
-    Hive.close();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   Hive.close();
+  //   super.dispose();
+  // }
 }
