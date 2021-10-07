@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/wordModel.dart';
 import 'package:language_miner/page/add_word.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class WordsPage extends StatefulWidget {
   @override
@@ -25,6 +29,27 @@ class _WordsPageState extends State<WordsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: new AppBar(
+        title: Text('Words'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              exportTsv();
+            },
+            icon: Icon(Icons.import_export),
+          ),
+          IconButton(
+            onPressed: () {
+              box.clear();
+            },
+            icon: Icon(Icons.delete),
+          ),
+          IconButton(
+            onPressed: _checkPermission,
+            icon: Icon(Icons.gps_fixed),
+          ),
+        ],
+      ),
       body: ValueListenableBuilder<Box<WordModel>>(
         valueListenable: Hive.box<WordModel>('words').listenable(),
         builder: (context, box, _) {
@@ -127,9 +152,26 @@ class _WordsPageState extends State<WordsPage> {
         ));
   }
 
-  // @override
-  // void dispose() {
-  //   Hive.close();
-  //   super.dispose();
-  // }
+  void exportTsv() async {
+    var words = box.values.toList().cast<WordModel>();
+
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
+    if (status.isGranted) {
+      // final Directory directory = await getApplicationDocumentsDirectory();
+      final Directory? directory = await getExternalStorageDirectory();
+      final File file = File('${directory!.path}/export.tsv');
+      print('${directory.path}/my_file.txt');
+      for (var word in words) {
+        await file.writeAsString(
+          '${word.word}\t${word.sentence}\t${word.translation}\n',
+          mode: FileMode.append,
+        );
+      }
+    }
+  }
+
+  Future<void> _checkPermission() async {}
 }
