@@ -26,40 +26,67 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int pageIndex = 0;
-
+  int testInt = 0;
+  late PageController _pageController;
   List<Widget> pages = [TextPg(), WordPg()];
 
-  void onTap(int index) {
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void changePage(int index) {
     setState(() {
       pageIndex = index;
+      _pageController.animateToPage(index,
+          duration: Duration(milliseconds: 200), curve: Curves.easeOut);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: Color(Colors.black.hashCode),
-      appBar: AppBar(
-        title: Text('Language miner'),
+    return GestureDetector(
+      child: Scaffold(
+        // backgroundColor: Color(Colors.black.hashCode),
+        body: PageView(
+          controller: _pageController,
+          children: pages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Texts',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.label_important_rounded),
+              label: 'Words',
+            )
+          ],
+          currentIndex: pageIndex,
+          onTap: changePage,
+          selectedItemColor: Colors.green,
+        ),
       ),
-      body: Center(
-        child: pages.elementAt(pageIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Texts',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.label_important_rounded),
-            label: 'Words',
-          )
-        ],
-        currentIndex: pageIndex,
-        onTap: onTap,
-        selectedItemColor: Colors.green,
-      ),
+      onPanUpdate: (details) {
+        // Swiping in right direction.
+        if (details.delta.dx > 0) {
+          testInt > 1 ? testInt -= 1 : testInt = 0;
+          changePage(testInt);
+        }
+        // Swiping in left direction.
+        if (details.delta.dx < 0) {
+          testInt > 1 ? testInt += 1 : testInt = 1;
+          changePage(testInt);
+        }
+      },
     );
   }
 }

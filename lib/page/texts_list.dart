@@ -18,6 +18,9 @@ class _TextsPageState extends State<TextsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Texts'),
+      ),
       body: ValueListenableBuilder<Box<TextModel>>(
         valueListenable: Hive.box<TextModel>('texts').listenable(),
         builder: (context, box, _) {
