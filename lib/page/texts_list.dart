@@ -29,6 +29,7 @@ class _TextsPageState extends State<TextsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
         child: Icon(Icons.add),
         onPressed: () => showDialog(
             context: context,
@@ -44,7 +45,7 @@ class _TextsPageState extends State<TextsPage> {
       return Center(
         child: Text(
           'No texts here!',
-          style: TextStyle(fontSize: 24),
+          style: TextStyle(fontSize: 24, color: Colors.white),
         ),
       );
     } else {
@@ -132,31 +133,4 @@ class _TextsPageState extends State<TextsPage> {
           )
         ],
       );
-
-  // void editText(TextModel text, String title, String contents) {
-  //   text.title = title;
-  //   text.contents = contents;
-
-  //   text.save();
-  // }
-
-  // void deleteTransaction(TextModel text) {
-  //   text.delete();
-  // }
-
-  // Future addText(String title, String contents) async {
-  //   final text = TextModel()
-  //     ..title = title
-  //     ..contents = contents
-  //     ..timeCreated = DateTime.now();
-
-  //   final box = Hive.box<TextModel>('texts');
-  //   box.add(text);
-  // }
-
-  // @override
-  // void dispose() {
-  //   Hive.close();
-  //   super.dispose();
-  // }
 }

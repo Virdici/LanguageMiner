@@ -15,7 +15,20 @@ void main() async {
 
   runApp(MaterialApp(
     title: 'yap',
-    home: MyApp(),
+    theme: ThemeData(
+        primaryColor: Colors.grey,
+        backgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
+        bottomNavigationBarTheme:
+            BottomNavigationBarThemeData(backgroundColor: Colors.grey),
+        textTheme: TextTheme(
+            headline1: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold))),
+    routes: {
+      '/': (BuildContext context) => MyApp(),
+    },
   ));
 }
 
@@ -25,8 +38,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  int pageIndex = 0;
-  int testInt = 0;
+  int _pageIndex = 0;
   late PageController _pageController;
   List<Widget> pages = [TextPg(), WordPg()];
 
@@ -43,50 +55,35 @@ class _MyAppState extends State<MyApp> {
   }
 
   void changePage(int index) {
-    setState(() {
-      pageIndex = index;
-      _pageController.animateToPage(index,
-          duration: Duration(milliseconds: 200), curve: Curves.easeOut);
-    });
+    setState(() {});
+    _pageIndex = index;
+    _pageController.animateToPage(index,
+        duration: Duration(milliseconds: 300), curve: Curves.easeOut);
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Scaffold(
-        // backgroundColor: Color(Colors.black.hashCode),
-        body: PageView(
-          controller: _pageController,
-          children: pages,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Texts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.label_important_rounded),
-              label: 'Words',
-            )
-          ],
-          currentIndex: pageIndex,
-          onTap: changePage,
-          selectedItemColor: Colors.green,
-        ),
+    return Scaffold(
+      // backgroundColor: Color(Colors.black.hashCode),
+      body: PageView(
+        controller: _pageController,
+        children: pages,
       ),
-      onPanUpdate: (details) {
-        // Swiping in right direction.
-        if (details.delta.dx > 0) {
-          testInt > 1 ? testInt -= 1 : testInt = 0;
-          changePage(testInt);
-        }
-        // Swiping in left direction.
-        if (details.delta.dx < 0) {
-          testInt > 1 ? testInt += 1 : testInt = 1;
-          changePage(testInt);
-        }
-      },
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Texts',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.label_important_rounded),
+            label: 'Words',
+          )
+        ],
+        currentIndex: _pageIndex,
+        onTap: changePage,
+        selectedItemColor: Colors.green,
+      ),
     );
   }
 }
@@ -168,13 +165,13 @@ class WordPg extends StatelessWidget {
 // }
 
 // class _HomeState extends State<Home> {
-//   int pageIndex = 0;
+//   int _pageIndex = 0;
 
 //   List<Widget> pages = <Widget>[TextsPage(), WordsPage()];
 
 //   void onTap(int index) {
 //     setState(() {
-//       pageIndex = index;
+//       _pageIndex = index;
 //     });
 //   }
 
@@ -185,7 +182,7 @@ class WordPg extends StatelessWidget {
 //         title: Text('LangReader'),
 //       ),
 //       body: Center(
-//         child: pages.elementAt(pageIndex),
+//         child: pages.elementAt(_pageIndex),
 //       ),
 //       bottomNavigationBar: BottomNavigationBar(
 //         items: [
@@ -198,7 +195,7 @@ class WordPg extends StatelessWidget {
 //             label: 'Words',
 //           )
 //         ],
-//         currentIndex: pageIndex,
+//         currentIndex: _pageIndex,
 //         onTap: onTap,
 //         selectedItemColor: Colors.green,
 //       ),

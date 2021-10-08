@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:language_miner/Controllers/wordController.dart';
@@ -44,10 +45,6 @@ class _WordsPageState extends State<WordsPage> {
             },
             icon: Icon(Icons.delete),
           ),
-          IconButton(
-            onPressed: _checkPermission,
-            icon: Icon(Icons.gps_fixed),
-          ),
         ],
       ),
       body: ValueListenableBuilder<Box<WordModel>>(
@@ -79,6 +76,7 @@ class _WordsPageState extends State<WordsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.green,
           child: Icon(Icons.add),
           onPressed: () => showDialog(
               // wordBox.clear(); //clear box
@@ -163,15 +161,15 @@ class _WordsPageState extends State<WordsPage> {
       // final Directory directory = await getApplicationDocumentsDirectory();
       final Directory? directory = await getExternalStorageDirectory();
       final File file = File('${directory!.path}/export.tsv');
-      print('${directory.path}/my_file.txt');
       for (var word in words) {
         await file.writeAsString(
           '${word.word}\t${word.sentence}\t${word.translation}\n',
           mode: FileMode.append,
         );
       }
+      showToast('Saved to:\n\n ${directory.path}/export.tsv');
     }
   }
 
-  Future<void> _checkPermission() async {}
+  void showToast(String message) => Fluttertoast.showToast(msg: message);
 }

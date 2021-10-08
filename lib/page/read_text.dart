@@ -55,33 +55,47 @@ class _ReadTextState extends State<ReadText> {
     //     print(_scrollController.offset);
     //   });
 
+    double _scaleFactor = 1;
+    double _baseScaleFactor = 1;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(titleController.text),
       ),
-      body: SingleChildScrollView(
-        // controller: _scrollController =                              //set scroll position
-        //     ScrollController(initialScrollOffset: 9485),
-        child: SelectableText.rich(
-          TextSpan(
-            style: TextStyle(color: Colors.black, fontSize: 16),
-            children: <TextSpan>[
-              for (var i = 0; i < paragraphsList.length; i++)
-                paragraphsList[i] ==
-                        '''
+      body: GestureDetector(
+        onScaleStart: (details) {
+          _baseScaleFactor = _scaleFactor;
+        },
+        onScaleUpdate: (details) {
+          _scaleFactor = (_baseScaleFactor * details.scale).roundToDouble();
+          setState(() {});
+          print(_scaleFactor);
+        },
+        child: SingleChildScrollView(
+          // controller: _scrollController =                              //set scroll position
+          //     ScrollController(initialScrollOffset: 9485),
+          child: SelectableText.rich(
+            TextSpan(
+              style: TextStyle(color: Colors.black, fontSize: 16),
+              children: <TextSpan>[
+                for (var i = 0; i < paragraphsList.length; i++)
+                  paragraphsList[i] ==
+                          '''
 '''
-                    ? TextSpan(text: '''
-
-
+                      ? TextSpan(text: '''
+      
+      
 ''')
-                    : TextSpan(
-                        text: paragraphsList[i] + " ",
-                        recognizer: new TapGestureRecognizer()
-                          ..onTap = () => {
-                                selectedSentence = paragraphsList[i],
-                                modalSentence(paragraphsList[i])
-                              }),
-            ],
+                      : TextSpan(
+                          text: paragraphsList[i] + " ",
+                          style: Theme.of(context).textTheme.headline1,
+                          recognizer: new TapGestureRecognizer()
+                            ..onTap = () => {
+                                  selectedSentence = paragraphsList[i],
+                                  modalSentence(paragraphsList[i])
+                                }),
+              ],
+            ),
           ),
         ),
       ),
