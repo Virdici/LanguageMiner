@@ -22,10 +22,17 @@ void main() async {
         bottomNavigationBarTheme:
             BottomNavigationBarThemeData(backgroundColor: Colors.grey),
         textTheme: TextTheme(
-            headline1: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold))),
+          headline1: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenDyslexic'),
+          headline2: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenDyslexic'),
+        )),
     routes: {
       '/': (BuildContext context) => MyApp(),
     },
@@ -124,30 +131,6 @@ class WordPg extends StatelessWidget {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Future main() async {
 //   await Hive.initFlutter();
 //   Hive.registerAdapter(TextModelAdapter());
@@ -202,3 +185,4 @@ class WordPg extends StatelessWidget {
 //     );
 //   }
 // }
+

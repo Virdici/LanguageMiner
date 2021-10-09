@@ -26,4 +26,17 @@ class WordController {
     final box = Hive.box<WordModel>('words');
     box.add(wordToAdd);
   }
+
+  //TODO dodać sprawdzanie po definicji
+  static bool checkIfExists(String term, String sentence) {
+    var box = Hive.box<WordModel>('words');
+    var terms = box.values.where(
+        (element) => element.word == term && element.sentence == sentence);
+
+    if (terms.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

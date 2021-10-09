@@ -69,14 +69,13 @@ class _WordsPageState extends State<WordsPage> {
                     final word = words[index];
                     return wordCard(word, words.length);
                   },
-                ))
+                )),
               ],
             );
           }
         },
       ),
       floatingActionButton: FloatingActionButton(
-          backgroundColor: Colors.green,
           child: Icon(Icons.add),
           onPressed: () => showDialog(
               // wordBox.clear(); //clear box
@@ -95,28 +94,31 @@ class _WordsPageState extends State<WordsPage> {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    word.word,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                        fontSize: 24),
-                  ),
-                  Container(
-                    child: Text(
-                      word.translation!,
-                      softWrap: true,
-                    ),
-                  )
-                ],
+              Text(
+                word.word,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    fontSize: 24),
               ),
-              IconButton(
-                onPressed: () => WordController.deleteWord(word),
-                icon: Icon(Icons.delete),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => AddWordDialog(
+                          word: word,
+                          onClickedDone: (wordName, translation, sentence) =>
+                              WordController.editText(
+                                  word, wordName, translation, sentence)),
+                    ),
+                    icon: Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    onPressed: () => WordController.deleteWord(word),
+                    icon: Icon(Icons.delete),
+                  ),
+                ],
               )
             ],
           ),
@@ -126,21 +128,16 @@ class _WordsPageState extends State<WordsPage> {
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(24, 8, 64, 2),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        Text(word.sentence),
-                        IconButton(
-                          onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => AddWordDialog(
-                                word: word,
-                                onClickedDone: (wordName, translation,
-                                        sentence) =>
-                                    WordController.editText(
-                                        word, wordName, translation, sentence)),
-                          ),
-                          icon: Icon(Icons.edit),
+                        Align(
+                            child: Text(word.translation!),
+                            alignment: Alignment.centerLeft),
+                        Align(
+                            child: Text(word.sentence),
+                            alignment: Alignment.centerLeft),
+                        SizedBox(
+                          height: 12,
                         )
                       ],
                     ),

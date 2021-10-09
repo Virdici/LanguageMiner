@@ -52,6 +52,7 @@ class _AddWordDialogState extends State<AddWordDialog> {
             SizedBox(height: 8),
             TextFormField(
               controller: wordController,
+              keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter word',
@@ -62,6 +63,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
             SizedBox(height: 8),
             TextFormField(
               controller: translationController,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter translation',
@@ -73,6 +76,8 @@ class _AddWordDialogState extends State<AddWordDialog> {
             SizedBox(height: 8),
             TextFormField(
               controller: sentenceController,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter sentence',

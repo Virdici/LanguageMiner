@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:language_miner/Controllers/dictController.dart';
 import 'package:language_miner/Controllers/wordController.dart';
@@ -14,6 +15,11 @@ class ReadText extends StatefulWidget {
   _ReadTextState createState() => _ReadTextState();
 }
 
+class AlwaysDisabledFocusNode extends FocusNode {
+  @override
+  bool get hasFocus => false;
+}
+
 class _ReadTextState extends State<ReadText> {
   final titleController = TextEditingController();
   final contentsController = TextEditingController();
@@ -24,6 +30,7 @@ class _ReadTextState extends State<ReadText> {
   late String selectedWord;
   late String selectedSentence;
   // late ScrollController _scrollController;
+  double fontSize = 12;
 
   int scrollPos = 0;
   late List<String> paragraphsList = content.split(
@@ -48,59 +55,120 @@ class _ReadTextState extends State<ReadText> {
     // debugPrint(paragraphsList.toString());
   }
 
+  void changeTextSize(String size) {
+    switch (size) {
+      case '0':
+        setState(() {
+          fontSize = 24;
+        });
+        break;
+      case '1':
+        break;
+      default:
+    }
+  }
+
+  Widget textSpan(String text) {
+    List<String> words = text.split(new RegExp(
+        r"\ +|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß ])|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[^a-zA-Z0-9äöüÄÖÜß ])"));
+    return Wrap(
+      children: [
+        for (var i = 0; i < words.length; i++)
+          GestureDetector(
+            child: Text(
+              RegExp(r'[<>?!,.„“]').hasMatch(words[i])
+                  ? words[i]
+                  : ' ' + words[i],
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenDyslexic'),
+            ),
+            onTap: () async => {
+              selectedSentence = text,
+              selectedWord = words[i],
+              dictTerms = await DictController.getTerm(words[i]),
+              WordController.checkIfExists(words[i], selectedSentence)
+                  ? showToast('Term already saved')
+                  : modalDefinitions(dictTerms),
+              // modalSentence(words[i]),
+            },
+          )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // _scrollController = new ScrollController()                       //get scroll position
     //   ..addListener(() {
     //     print(_scrollController.offset);
     //   });
-
-    double _scaleFactor = 1;
-    double _baseScaleFactor = 1;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(titleController.text),
+        actions: [
+          PopupMenuButton(
+              icon: Icon(Icons.menu),
+              itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: Text('penis'),
+                      value: 0,
+                    ),
+                  ],
+              onSelected: (item) => {changeTextSize(item.toString())})
+        ],
       ),
-      body: GestureDetector(
-        onScaleStart: (details) {
-          _baseScaleFactor = _scaleFactor;
-        },
-        onScaleUpdate: (details) {
-          _scaleFactor = (_baseScaleFactor * details.scale).roundToDouble();
-          setState(() {});
-          print(_scaleFactor);
-        },
-        child: SingleChildScrollView(
-          // controller: _scrollController =                              //set scroll position
-          //     ScrollController(initialScrollOffset: 9485),
-          child: SelectableText.rich(
-            TextSpan(
-              style: TextStyle(color: Colors.black, fontSize: 16),
-              children: <TextSpan>[
-                for (var i = 0; i < paragraphsList.length; i++)
-                  paragraphsList[i] ==
-                          '''
-'''
-                      ? TextSpan(text: '''
-      
-      
-''')
-                      : TextSpan(
-                          text: paragraphsList[i] + " ",
-                          style: Theme.of(context).textTheme.headline1,
-                          recognizer: new TapGestureRecognizer()
-                            ..onTap = () => {
-                                  selectedSentence = paragraphsList[i],
-                                  modalSentence(paragraphsList[i])
-                                }),
-              ],
-            ),
-          ),
-        ),
-      ),
+      body: ListView.builder(
+          itemCount: paragraphsList.length,
+          itemBuilder: (context, index) {
+            return textSpan(paragraphsList[index]);
+          }),
     );
   }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   // _scrollController = new ScrollController()                       //get scroll position
+  //   //   ..addListener(() {
+  //   //     print(_scrollController.offset);
+  //   //   });
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Text(titleController.text),
+  //       actions: [
+  //         PopupMenuButton(
+  //             icon: Icon(Icons.menu),
+  //             itemBuilder: (context) => [
+  //                   PopupMenuItem(
+  //                     child: Text('penis'),
+  //                     value: 0,
+  //                   ),
+  //                 ],
+  //             onSelected: (item) => {changeTextSize(item.toString())})
+  //       ],
+  //     ),
+  //     body: ListView.builder(
+  //         itemCount: paragraphsList.length,
+  //         itemBuilder: (context, index) {
+  //           return GestureDetector(
+  //             child: Text(
+  //               paragraphsList[index],
+  //               style: TextStyle(
+  //                   color: Colors.white,
+  //                   fontSize: fontSize,
+  //                   fontWeight: FontWeight.bold,
+  //                   fontFamily: 'OpenDyslexic'),
+  //             ),
+  //             onTap: () => {
+  //               selectedSentence = paragraphsList[index],
+  //               modalSentence(paragraphsList[index])
+  //             },
+  //           );
+  //         }),
+  //   );
+  // }
 
   Future modalSentence(String sentence) {
     // split sentence into words and characters
@@ -112,7 +180,7 @@ class _ReadTextState extends State<ReadText> {
       builder: (BuildContext context) {
         return Container(
           height: 300,
-          color: Colors.grey[500],
+          color: Colors.grey[900],
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -124,8 +192,8 @@ class _ReadTextState extends State<ReadText> {
                     children: <TextSpan>[
                       for (var i = 0; i < words.length; i++)
                         TextSpan(
-                            style: TextStyle(fontSize: 24),
                             text: words[i] + ' ',
+                            style: Theme.of(context).textTheme.headline1,
                             recognizer: new TapGestureRecognizer()
                               ..onTap = () async => {
                                     print("selected word: " + words[i]),
@@ -136,15 +204,6 @@ class _ReadTextState extends State<ReadText> {
                                   }),
                     ],
                   )),
-                  // ElevatedButton(
-                  //     child: const Text('Close BottomSheet'),
-                  //     onPressed: () async => {
-                  //           // WordController.addWord(
-                  //           //     selectedWord, 'translation', sentence)
-                  //           dictTerms =
-                  //               await DictController.getTerm(selectedWord),
-                  //           print(dictTerms)
-                  //         })
                 ],
               ),
             ),
@@ -159,10 +218,8 @@ class _ReadTextState extends State<ReadText> {
         context: context,
         builder: (BuildContext context) {
           return Container(
-            height: 300,
             color: Colors.grey[500],
-            child: Center(
-                child: Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -171,31 +228,36 @@ class _ReadTextState extends State<ReadText> {
                   definitionCard(definitions[i])
                 // Text(definitions.length.toString())
               ],
-            )),
+            ),
           );
         });
   }
 
   Widget definitionCard(Map<dynamic, dynamic> definition) {
     String definitionFormated =
-        definition['definition'].toString().replaceAll('<br>', '\n');
-    return GestureDetector(
-      child: Card(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              definitionFormated,
-              style: TextStyle(fontSize: 16),
+        definition['definition'].toString().replaceAll('<br>', '');
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
+      child: GestureDetector(
+          child: Card(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  definitionFormated,
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-      onTap: () {
-        WordController.addWord(
-            selectedWord, definitionFormated, selectedSentence);
-      },
+          onTap: () {
+            WordController.addWord(
+                selectedWord, definitionFormated, selectedSentence);
+            Navigator.pop(context);
+          }),
     );
   }
+
+  void showToast(String message) => Fluttertoast.showToast(msg: message);
 }

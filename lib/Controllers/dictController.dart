@@ -13,7 +13,7 @@ class DictController {
     var exists = await databaseExists(path);
 
     if (!exists) {
-      print('creating db copy');
+      // print('creating db copy');
 
       try {
         await Directory(dirname(path)).create(recursive: true);
@@ -25,20 +25,38 @@ class DictController {
 
       await File(path).writeAsBytes(bytes, flush: true);
     } else {
-      print('opening db');
+      // print('opening db');
     }
 
     db = await openDatabase(path);
-    print("is db open: " + db.isOpen.toString());
+    // print("is db open: " + db.isOpen.toString());
 
     var data = await db.rawQuery(
         'select term,definition from definitions where term like "$term"');
     await db.close();
 
-    print("is db open: " + db.isOpen.toString());
+    // print("is db open: " + db.isOpen.toString());
 
-    return data;
-    // debugPrint(data.toString());
-    // debugPrint(firstData);
+    List<Map<String, Object?>> goodData = new List.empty(growable: true);
+    for (var term in data) {
+      Map<String, Object?> newDefinition = Map();
+      if (term['definition'].toString().contains(';')) {
+        List<String> definitions = term['definition'].toString().split(';');
+        for (var definition in definitions) {
+          newDefinition = {
+            'term': term['term'],
+            'definition': definition.split('. ').last
+          };
+          goodData.add(newDefinition);
+        }
+      } else {
+        newDefinition = {
+          'term': term['term'],
+          'definition': term['definition'].toString().split('. ').last
+        };
+        goodData.add(newDefinition);
+      }
+    }
+    return goodData;
   }
 }
