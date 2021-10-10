@@ -20,6 +20,17 @@ class _TextsPageState extends State<TextsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Texts'),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => AddTextDialog(
+                          onClickedDone: TextController.addText,
+                        ));
+              },
+              icon: Icon(Icons.add))
+        ],
       ),
       body: ValueListenableBuilder<Box<TextModel>>(
         valueListenable: Hive.box<TextModel>('texts').listenable(),
@@ -27,14 +38,6 @@ class _TextsPageState extends State<TextsPage> {
           final texts = box.values.toList().cast<TextModel>();
           return buildContent(texts);
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => showDialog(
-            context: context,
-            builder: (context) => AddTextDialog(
-                  onClickedDone: TextController.addText,
-                )),
       ),
     );
   }
@@ -132,31 +135,4 @@ class _TextsPageState extends State<TextsPage> {
           )
         ],
       );
-
-  // void editText(TextModel text, String title, String contents) {
-  //   text.title = title;
-  //   text.contents = contents;
-
-  //   text.save();
-  // }
-
-  // void deleteTransaction(TextModel text) {
-  //   text.delete();
-  // }
-
-  // Future addText(String title, String contents) async {
-  //   final text = TextModel()
-  //     ..title = title
-  //     ..contents = contents
-  //     ..timeCreated = DateTime.now();
-
-  //   final box = Hive.box<TextModel>('texts');
-  //   box.add(text);
-  // }
-
-  // @override
-  // void dispose() {
-  //   Hive.close();
-  //   super.dispose();
-  // }
 }

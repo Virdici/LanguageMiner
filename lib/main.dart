@@ -16,11 +16,13 @@ void main() async {
   runApp(MaterialApp(
     title: 'yap',
     theme: ThemeData(
-        primaryColor: Colors.grey,
+        primaryColor: Colors.grey[900],
         backgroundColor: Colors.black,
         scaffoldBackgroundColor: Colors.black,
-        bottomNavigationBarTheme:
-            BottomNavigationBarThemeData(backgroundColor: Colors.grey),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            selectedItemColor: Colors.green[400],
+            backgroundColor: Colors.grey[900],
+            unselectedItemColor: Colors.grey[700]),
         textTheme: TextTheme(
           headline1: TextStyle(
               color: Colors.white,
@@ -46,54 +48,73 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int _pageIndex = 0;
-  late PageController _pageController;
   List<Widget> pages = [TextPg(), WordPg()];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
   void changePage(int index) {
     setState(() {});
     _pageIndex = index;
-    _pageController.animateToPage(index,
-        duration: Duration(milliseconds: 300), curve: Curves.easeOut);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Color(Colors.black.hashCode),
-      body: PageView(
-        controller: _pageController,
-        children: pages,
+      body: Center(
+        child: pages.elementAt(_pageIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: Icon(Icons.auto_stories),
             label: 'Texts',
+            backgroundColor: Colors.red,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.label_important_rounded),
+            icon: Icon(Icons.translate),
             label: 'Words',
-          )
+            backgroundColor: Colors.green,
+          ),
         ],
         currentIndex: _pageIndex,
         onTap: changePage,
-        selectedItemColor: Colors.green,
       ),
     );
   }
 }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       // backgroundColor: Color(Colors.black.hashCode),
+//       body: PageView(
+//         children: pages,
+//       ),
+//       bottomNavigationBar: BottomNavigationBar(
+//         items: [
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.book),
+//             label: 'Texts',
+//           ),
+//           BottomNavigationBarItem(
+//             icon: Icon(Icons.label_important_rounded),
+//             label: 'Words',
+//           )
+//         ],
+//         currentIndex: _pageIndex,
+//         onTap: changePage,
+//         selectedItemColor: Colors.green,
+//       ),
+//     );
+//   }
+// }
 
 class TextPg extends StatelessWidget {
   @override
@@ -130,59 +151,3 @@ class WordPg extends StatelessWidget {
     );
   }
 }
-
-// Future main() async {
-//   await Hive.initFlutter();
-//   Hive.registerAdapter(TextModelAdapter());
-//   await Hive.openBox<TextModel>('texts');
-
-//   runApp(MaterialApp(
-//     title: 'yap',
-//     home: Home(),
-//   ));
-// }
-
-// class Home extends StatefulWidget {
-//   @override
-//   _HomeState createState() => _HomeState();
-// }
-
-// class _HomeState extends State<Home> {
-//   int _pageIndex = 0;
-
-//   List<Widget> pages = <Widget>[TextsPage(), WordsPage()];
-
-//   void onTap(int index) {
-//     setState(() {
-//       _pageIndex = index;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('LangReader'),
-//       ),
-//       body: Center(
-//         child: pages.elementAt(_pageIndex),
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: [
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.book),
-//             label: 'Texts',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.label_important_rounded),
-//             label: 'Words',
-//           )
-//         ],
-//         currentIndex: _pageIndex,
-//         onTap: onTap,
-//         selectedItemColor: Colors.green,
-//       ),
-//     );
-//   }
-// }
-

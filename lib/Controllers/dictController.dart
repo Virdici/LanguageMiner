@@ -41,7 +41,7 @@ class DictController {
     for (var term in data) {
       Map<String, Object?> newDefinition = Map();
       if (term['definition'].toString().contains(';')) {
-        List<String> definitions = term['definition'].toString().split(';');
+        List<String> definitions = term['definition'].toString().split('; ');
         for (var definition in definitions) {
           newDefinition = {
             'term': term['term'],

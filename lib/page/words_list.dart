@@ -33,18 +33,44 @@ class _WordsPageState extends State<WordsPage> {
       appBar: new AppBar(
         title: Text('Words'),
         actions: [
-          IconButton(
-            onPressed: () async {
-              exportTsv();
-            },
-            icon: Icon(Icons.import_export),
-          ),
-          IconButton(
-            onPressed: () {
-              box.clear();
-            },
-            icon: Icon(Icons.delete),
-          ),
+          TextButton(
+              child: Row(
+                children: <Widget>[
+                  Text(
+                    'Export',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Icon(
+                    Icons.import_export,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              onPressed: () async {
+                exportTsv();
+              }),
+          TextButton(
+              child: Row(
+                children: <Widget>[
+                  Text(
+                    'Delete all',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              onPressed: () {
+                box.clear();
+              }),
         ],
       ),
       body: ValueListenableBuilder<Box<WordModel>>(
@@ -75,14 +101,6 @@ class _WordsPageState extends State<WordsPage> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () => showDialog(
-              // wordBox.clear(); //clear box
-              context: context,
-              builder: (context) => AddWordDialog(
-                    onClickedDone: WordController.addWord,
-                  ))),
     );
   }
 

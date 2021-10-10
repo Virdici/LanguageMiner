@@ -1,8 +1,9 @@
-import 'package:flutter/gestures.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:language_miner/Controllers/dictController.dart';
+import 'package:language_miner/Controllers/settings.dart';
 import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/wordModel.dart';
 import '../model/textModel.dart';
@@ -29,10 +30,13 @@ class _ReadTextState extends State<ReadText> {
   late List<Map<dynamic, dynamic>> dictTerms;
   late String selectedWord;
   late String selectedSentence;
-  // late ScrollController _scrollController;
+  ScrollController scrollController = new ScrollController();
   double fontSize = 12;
+  double paddingSize = 0;
+  double scrollPosition = 0;
+  late Settings settings;
+  double appBarSize = 50;
 
-  int scrollPos = 0;
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
 
@@ -50,35 +54,178 @@ class _ReadTextState extends State<ReadText> {
       titleController.text = text.title;
       contentsController.text = text.contents;
     }
-
     content = contentsController.text;
-    // debugPrint(paragraphsList.toString());
+    settings = Settings();
+    settings.init().then((value) {
+      setState(() {
+        fontSize = settings.getfontSize();
+        paddingSize = settings.getPadding();
+        scrollPosition = settings.getScrollPosition();
+      });
+    });
+    Future.delayed(Duration.zero, () => setPosition(context));
   }
 
-  void changeTextSize(String size) {
-    switch (size) {
-      case '0':
-        setState(() {
-          fontSize = 24;
-        });
-        break;
-      case '1':
-        break;
-      default:
-    }
+  void setPosition(BuildContext context) {
+    scrollController.animateTo(scrollPosition,
+        duration: new Duration(microseconds: 1), curve: Curves.bounceIn);
+  }
+
+  void increaseTextSize() {
+    setState(() {
+      if (fontSize >= 48) {
+        fontSize = 48;
+        settings.setfontSize(48);
+      } else {
+        fontSize += 2;
+        settings.setfontSize(fontSize += 2);
+      }
+    });
+  }
+
+  void decreaseTextSize() {
+    setState(() {
+      if (fontSize <= 4) {
+        fontSize = 4;
+        settings.setfontSize(4);
+      } else {
+        fontSize -= 2;
+        settings.setfontSize(fontSize -= 2);
+      }
+    });
+  }
+
+  void increasePadding() {
+    setState(() {
+      if (paddingSize >= 48) {
+        paddingSize = 48;
+        settings.setPadding(48);
+      } else {
+        paddingSize += 4;
+        settings.setPadding(paddingSize += 4);
+      }
+    });
+  }
+
+  void decreasePadding() {
+    setState(() {
+      if (paddingSize <= 0) {
+        paddingSize = 0;
+        settings.setPadding(0);
+      } else {
+        paddingSize -= 4;
+        settings.setPadding(paddingSize -= 4);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    scrollController = ScrollController() //get scroll position
+      ..addListener(() {
+        scrollPosition = scrollController.offset;
+      });
+    return Scaffold(
+      appBar: PreferredSize(
+        child: appBar(),
+        preferredSize: Size.fromHeight(appBarSize),
+      ),
+      body: GestureDetector(
+        onDoubleTap: () {
+          setState(() {
+            if (appBarSize == 50) {
+              appBarSize = 0;
+            } else {
+              appBarSize = 50;
+            }
+          });
+        },
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingSize),
+          child: ListView.builder(
+              controller: scrollController,
+              itemCount: paragraphsList.length,
+              itemBuilder: (context, index) {
+                return textSpan(paragraphsList[index]);
+              }),
+        ),
+      ),
+    );
+  }
+
+  AppBar appBar() {
+    return AppBar(
+      title: Text(titleController.text),
+      actions: [
+        PopupMenuButton(
+          color: Colors.grey,
+          icon: Icon(Icons.menu),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('font size'),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: decreaseTextSize,
+                        icon: Icon(Icons.remove),
+                        color: Colors.black,
+                      ),
+                      IconButton(
+                        onPressed: increaseTextSize,
+                        icon: Icon(
+                          Icons.add,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              value: 0,
+            ),
+            PopupMenuItem(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Padding Size'),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: decreasePadding,
+                        icon: Icon(Icons.remove),
+                        color: Colors.black,
+                      ),
+                      IconButton(
+                        onPressed: increasePadding,
+                        icon: Icon(
+                          Icons.add,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              value: 0,
+            ),
+          ],
+        )
+      ],
+    );
   }
 
   Widget textSpan(String text) {
     List<String> words = text.split(new RegExp(
-        r"\ +|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß ])|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[^a-zA-Z0-9äöüÄÖÜß ])"));
+        r"(?<=[^a-zA-Z0-9äöüÄÖÜß])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß])|(?<=[^a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß])"));
     return Wrap(
       children: [
         for (var i = 0; i < words.length; i++)
           GestureDetector(
             child: Text(
-              RegExp(r'[<>?!,.„“]').hasMatch(words[i])
-                  ? words[i]
-                  : ' ' + words[i],
+              words[i],
               style: TextStyle(
                   color: Colors.white,
                   fontSize: fontSize,
@@ -91,7 +238,7 @@ class _ReadTextState extends State<ReadText> {
               dictTerms = await DictController.getTerm(words[i]),
               WordController.checkIfExists(words[i], selectedSentence)
                   ? showToast('Term already saved')
-                  : modalDefinitions(dictTerms),
+                  : modalDefinitions(dictTerms, words[i]),
               // modalSentence(words[i]),
             },
           )
@@ -99,135 +246,35 @@ class _ReadTextState extends State<ReadText> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // _scrollController = new ScrollController()                       //get scroll position
-    //   ..addListener(() {
-    //     print(_scrollController.offset);
-    //   });
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(titleController.text),
-        actions: [
-          PopupMenuButton(
-              icon: Icon(Icons.menu),
-              itemBuilder: (context) => [
-                    PopupMenuItem(
-                      child: Text('penis'),
-                      value: 0,
-                    ),
-                  ],
-              onSelected: (item) => {changeTextSize(item.toString())})
-        ],
-      ),
-      body: ListView.builder(
-          itemCount: paragraphsList.length,
-          itemBuilder: (context, index) {
-            return textSpan(paragraphsList[index]);
-          }),
-    );
-  }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   // _scrollController = new ScrollController()                       //get scroll position
-  //   //   ..addListener(() {
-  //   //     print(_scrollController.offset);
-  //   //   });
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text(titleController.text),
-  //       actions: [
-  //         PopupMenuButton(
-  //             icon: Icon(Icons.menu),
-  //             itemBuilder: (context) => [
-  //                   PopupMenuItem(
-  //                     child: Text('penis'),
-  //                     value: 0,
-  //                   ),
-  //                 ],
-  //             onSelected: (item) => {changeTextSize(item.toString())})
-  //       ],
-  //     ),
-  //     body: ListView.builder(
-  //         itemCount: paragraphsList.length,
-  //         itemBuilder: (context, index) {
-  //           return GestureDetector(
-  //             child: Text(
-  //               paragraphsList[index],
-  //               style: TextStyle(
-  //                   color: Colors.white,
-  //                   fontSize: fontSize,
-  //                   fontWeight: FontWeight.bold,
-  //                   fontFamily: 'OpenDyslexic'),
-  //             ),
-  //             onTap: () => {
-  //               selectedSentence = paragraphsList[index],
-  //               modalSentence(paragraphsList[index])
-  //             },
-  //           );
-  //         }),
-  //   );
-  // }
-
-  Future modalSentence(String sentence) {
-    // split sentence into words and characters
-    List<String> words = sentence.split(new RegExp(
-        r"\ +|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß ])|(?<=[^a-zA-Z0-9äöüÄÖÜß ])(?=[^a-zA-Z0-9äöüÄÖÜß ])"));
-    print(words);
+  Future modalDefinitions(
+      List<Map<dynamic, dynamic>> definitions, String word) {
     return showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 300,
-          color: Colors.grey[900],
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+        context: context,
+        builder: (BuildContext context) {
+          return SingleChildScrollView(
+            child: Container(
+              color: Colors.grey[900],
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  SelectableText.rich(TextSpan(
-                    children: <TextSpan>[
-                      for (var i = 0; i < words.length; i++)
-                        TextSpan(
-                            text: words[i] + ' ',
-                            style: Theme.of(context).textTheme.headline1,
-                            recognizer: new TapGestureRecognizer()
-                              ..onTap = () async => {
-                                    print("selected word: " + words[i]),
-                                    selectedWord = words[i],
-                                    dictTerms = await DictController.getTerm(
-                                        selectedWord),
-                                    modalDefinitions(dictTerms)
-                                  }),
-                    ],
-                  )),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      word,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'OpenDyslexic'),
+                    ),
+                  ),
+                  for (var i = 0; i < definitions.length; i++)
+                    // Text(definitions[i]['definition'].toString())
+                    definitionCard(definitions[i])
+                  // Text(definitions.length.toString())
                 ],
               ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future modalDefinitions(List<Map<dynamic, dynamic>> definitions) {
-    return showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            color: Colors.grey[500],
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                for (var i = 0; i < definitions.length; i++)
-                  // Text(definitions[i]['definition'].toString())
-                  definitionCard(definitions[i])
-                // Text(definitions.length.toString())
-              ],
             ),
           );
         });
@@ -237,16 +284,21 @@ class _ReadTextState extends State<ReadText> {
     String definitionFormated =
         definition['definition'].toString().replaceAll('<br>', '');
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: GestureDetector(
           child: Card(
+            color: Colors.green,
             child: Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
                 child: Text(
                   definitionFormated,
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'OpenDyslexic'),
                 ),
               ),
             ),
@@ -257,6 +309,12 @@ class _ReadTextState extends State<ReadText> {
             Navigator.pop(context);
           }),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    settings.setScrollPosition(scrollPosition);
   }
 
   void showToast(String message) => Fluttertoast.showToast(msg: message);
