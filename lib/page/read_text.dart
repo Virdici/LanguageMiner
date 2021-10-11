@@ -167,6 +167,9 @@ class _ReadTextState extends State<ReadText> {
         IconButton(
           onPressed: () {
             tts.speak('„Ich glaube, wir haben Schwein gehabt“, sagte Peter.');
+            tts.synthesizeToFile(
+                '„Ich glaube, wir haben Schwein gehabt“, sagte Peter.',
+                'ayo.mp3');
           },
           icon: Icon(Icons.play_arrow),
         ),
@@ -234,6 +237,7 @@ class _ReadTextState extends State<ReadText> {
     List<String> words = text.split(new RegExp(
         r"(?<=[^a-zA-Z0-9äöüÄÖÜß])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß])|(?<=[^a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß])"));
     return Wrap(
+      alignment: WrapAlignment.start,
       children: [
         for (var i = 0; i < words.length; i++)
           GestureDetector(

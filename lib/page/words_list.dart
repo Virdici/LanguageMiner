@@ -33,44 +33,82 @@ class _WordsPageState extends State<WordsPage> {
       appBar: new AppBar(
         title: Text('Words'),
         actions: [
-          TextButton(
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    'Export',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+          PopupMenuButton(
+              color: Colors.grey,
+              icon: Icon(Icons.menu),
+              itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Export',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.import_export,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () async {
+                            exportTsv();
+                          }),
                     ),
-                  ),
-                  Icon(
-                    Icons.import_export,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              onPressed: () async {
-                exportTsv();
-              }),
-          TextButton(
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    'Delete all',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Delete words',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            box.clear();
+                          }),
                     ),
-                  ),
-                  Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
-              onPressed: () {
-                box.clear();
-              }),
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Delete storage',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.delete_forever_outlined,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () async {
+                            List files = new List.empty(growable: true);
+                            final Directory? directory =
+                                await getExternalStorageDirectory();
+                            files = Directory("${directory!.path}/").listSync();
+                            for (File file in files)
+                              file.delete(recursive: true);
+                          }),
+                    ),
+                  ])
         ],
       ),
       body: ValueListenableBuilder<Box<WordModel>>(
