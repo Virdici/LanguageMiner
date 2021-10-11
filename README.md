@@ -11,6 +11,6 @@ Language Miner is a simple app to help with learning language(currently only ger
 
 ## Screenshots
 
-![App in texts view](screenshots/screenshot1.png)
-![App after look up](screenshot2.png)
-![App in words view](screenshot3.png)
+![App in texts view](screenshots/Screenshot1.png)
+![App after look up](screenshots/Screenshot2.png)
+![App in words view](screenshots/Screenshot3.png)
