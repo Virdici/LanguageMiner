@@ -51,4 +51,28 @@ class Settings {
     }
     return position;
   }
+
+  Future setFontFamily(String name) async {
+    _sp.setString('FontFamily', name);
+  }
+
+  String getFontFamily() {
+    String? name = _sp.getString('FontFamily');
+    if (name == null) {
+      name = 'Dayrom';
+    }
+    return name;
+  }
+
+  Future setTts(bool isTsEnabled) async {
+    _sp.setBool('isTTs', isTsEnabled);
+  }
+
+  bool getTts() {
+    bool? position = _sp.getBool('isTTs');
+    if (position == null) {
+      position = true;
+    }
+    return position;
+  }
 }

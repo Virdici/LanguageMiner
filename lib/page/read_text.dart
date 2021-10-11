@@ -40,6 +40,7 @@ class _ReadTextState extends State<ReadText> {
   bool isTTsEnabled = true;
   final FlutterTts tts = FlutterTts();
   bool isMenuShown = false;
+  String fontName = 'Dayrom';
 
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
@@ -65,6 +66,8 @@ class _ReadTextState extends State<ReadText> {
         fontSize = settings.getfontSize();
         paddingSize = settings.getPadding();
         scrollPosition = settings.getScrollPosition();
+        fontName = settings.getFontFamily();
+        isTTsEnabled = settings.getTts();
       });
     });
     Future.delayed(Duration.zero, () => setPosition(context));
@@ -75,54 +78,6 @@ class _ReadTextState extends State<ReadText> {
   void setPosition(BuildContext context) {
     scrollController.animateTo(scrollPosition,
         duration: new Duration(microseconds: 1), curve: Curves.bounceIn);
-  }
-
-  void increaseTextSize() {
-    setState(() {
-      if (fontSize >= 48) {
-        fontSize = 48;
-        settings.setfontSize(48);
-      } else {
-        fontSize += 2;
-        settings.setfontSize(fontSize += 2);
-      }
-    });
-  }
-
-  void decreaseTextSize() {
-    setState(() {
-      if (fontSize <= 4) {
-        fontSize = 4;
-        settings.setfontSize(4);
-      } else {
-        fontSize -= 2;
-        settings.setfontSize(fontSize -= 2);
-      }
-    });
-  }
-
-  void increasePadding() {
-    setState(() {
-      if (paddingSize >= 48) {
-        paddingSize = 48;
-        settings.setPadding(48);
-      } else {
-        paddingSize += 4;
-        settings.setPadding(paddingSize += 4);
-      }
-    });
-  }
-
-  void decreasePadding() {
-    setState(() {
-      if (paddingSize <= 0) {
-        paddingSize = 0;
-        settings.setPadding(0);
-      } else {
-        paddingSize -= 4;
-        settings.setPadding(paddingSize -= 4);
-      }
-    });
   }
 
   @override
@@ -140,13 +95,6 @@ class _ReadTextState extends State<ReadText> {
         alignment: Alignment.topRight,
         children: [
           GestureDetector(
-            onTap: () {
-              if (isMenuShown) {
-                setState(() {
-                  isMenuShown = false;
-                });
-              }
-            },
             onDoubleTap: () {
               setState(() {
                 if (appBarSize == 50) {
@@ -175,7 +123,7 @@ class _ReadTextState extends State<ReadText> {
   Widget customAppBar() {
     if (isMenuShown) {
       return Container(
-        height: 250,
+        height: 280,
         width: 220,
         color: Colors.grey[900],
         child: Column(
@@ -234,23 +182,62 @@ class _ReadTextState extends State<ReadText> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'TTS',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Switch(
+                      value: isTTsEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          isTTsEnabled = value;
+                          settings.setTts(isTTsEnabled);
+                        });
+                      })
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
               child: GestureDetector(
                 onTap: () {},
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'TTS',
+                      'Font',
                       style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
-                    Switch(
-                        value: isTTsEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            isTTsEnabled = value;
-                            print(isTTsEnabled);
-                          });
-                        })
+                    DropdownButton(
+                      value: fontName,
+                      focusColor: Colors.white,
+                      dropdownColor: Colors.grey[700],
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          fontName = newValue!;
+                          settings.setFontFamily(fontName);
+                        });
+                      },
+                      items: <String>[
+                        'Dayrom',
+                        'LouisGeorgeCafe',
+                        'OpenDyslexic'
+                      ].map<DropdownMenuItem<String>>(
+                        (String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: TextStyle(
+                                  color: Colors.white, fontFamily: value),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ),
                   ],
                 ),
               ),
@@ -295,7 +282,7 @@ class _ReadTextState extends State<ReadText> {
                   color: Colors.white,
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'OpenDyslexic'),
+                  fontFamily: fontName),
             ),
             onTap: () async => {
               selectedSentence = text,
