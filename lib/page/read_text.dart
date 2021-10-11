@@ -72,7 +72,7 @@ class _ReadTextState extends State<ReadText> {
     });
     Future.delayed(Duration.zero, () => setPosition(context));
     tts.setLanguage('de');
-    tts.setSpeechRate(0.5);
+    tts.setSpeechRate(0.8);
   }
 
   void setPosition(BuildContext context) {
@@ -321,7 +321,7 @@ class _ReadTextState extends State<ReadText> {
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'OpenDyslexic'),
+                          fontFamily: 'LouisGeorgeCafe'),
                     ),
                   ),
                   for (var i = 0; i < definitions.length; i++)
@@ -344,14 +344,14 @@ class _ReadTextState extends State<ReadText> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
+                padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
                 child: Text(
                   definitionFormated,
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: fontSize,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'OpenDyslexic'),
+                      fontFamily: 'LouisGeorgeCafe'),
                 ),
               ),
             ),
