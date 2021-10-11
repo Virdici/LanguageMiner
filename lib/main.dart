@@ -90,31 +90,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       // backgroundColor: Color(Colors.black.hashCode),
-//       body: PageView(
-//         children: pages,
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: [
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.book),
-//             label: 'Texts',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.label_important_rounded),
-//             label: 'Words',
-//           )
-//         ],
-//         currentIndex: _pageIndex,
-//         onTap: changePage,
-//         selectedItemColor: Colors.green,
-//       ),
-//     );
-//   }
-// }
 
 class TextPg extends StatelessWidget {
   @override

@@ -48,28 +48,6 @@ class _TextDialogState extends State<AddTextDialog> {
     print(isEditing);
 
     return returnDialog(title, context, isEditing);
-
-    // return AlertDialog(
-    //   title: Text(title),
-    //   content: Form(
-    //     key: formKey,
-    //     child: SingleChildScrollView(
-    //       child: Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         children: <Widget>[
-    //           SizedBox(height: 8),
-    //           buildTitle(),
-    //           SizedBox(height: 8),
-    //           buildContents(),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    //   actions: <Widget>[
-    //     buildCancelButton(context),
-    //     buildAddButton(context, isEditing: isEditing),
-    //   ],
-    // );
   }
 
   Widget returnDialog(String title, BuildContext context, bool isEditing) {

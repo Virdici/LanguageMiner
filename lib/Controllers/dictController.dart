@@ -13,7 +13,7 @@ class DictController {
     var exists = await databaseExists(path);
 
     if (!exists) {
-      // print('creating db copy');
+      print('creating db copy');
 
       try {
         await Directory(dirname(path)).create(recursive: true);
@@ -25,17 +25,17 @@ class DictController {
 
       await File(path).writeAsBytes(bytes, flush: true);
     } else {
-      // print('opening db');
+      print('opening db');
     }
 
     db = await openDatabase(path);
-    // print("is db open: " + db.isOpen.toString());
+    print("is db open: " + db.isOpen.toString());
 
     var data = await db.rawQuery(
         'select term,definition from definitions where term like "$term"');
 
     await db.close();
-    // print("is db open: " + db.isOpen.toString());
+    print("is db open: " + db.isOpen.toString());
 
     List<Map<String, Object?>> goodData = new List.empty(growable: true);
     for (var term in data) {

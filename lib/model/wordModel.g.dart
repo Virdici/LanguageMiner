@@ -18,15 +18,16 @@ class WordModelAdapter extends TypeAdapter<WordModel> {
     };
     return WordModel()
       ..word = fields[0] as String
-      ..translation = fields[1] as String
+      ..translation = fields[1] as String?
       ..sentence = fields[2] as String
-      ..timeAdded = fields[3] as DateTime;
+      ..timeAdded = fields[3] as DateTime
+      ..audioReference = fields[4] as String;
   }
 
   @override
   void write(BinaryWriter writer, WordModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.word)
       ..writeByte(1)
@@ -34,7 +35,9 @@ class WordModelAdapter extends TypeAdapter<WordModel> {
       ..writeByte(2)
       ..write(obj.sentence)
       ..writeByte(3)
-      ..write(obj.timeAdded);
+      ..write(obj.timeAdded)
+      ..writeByte(4)
+      ..write(obj.audioReference);
   }
 
   @override

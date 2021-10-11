@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -56,7 +57,29 @@ class _WordsPageState extends State<WordsPage> {
                             ],
                           ),
                           onPressed: () async {
-                            exportTsv();
+                            exportTsv(false);
+                          }),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Export with tts',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.import_export,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () async {
+                            exportTsv(true);
                           }),
                     ),
                     PopupMenuItem(
@@ -228,21 +251,25 @@ class _WordsPageState extends State<WordsPage> {
         ));
   }
 
-  void exportTsv() async {
+  void exportTsv(bool withTTS) async {
     var words = box.values.toList().cast<WordModel>();
+    final FlutterTts tts = FlutterTts();
 
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request();
     }
     if (status.isGranted) {
-      // final Directory directory = await getApplicationDocumentsDirectory();
       final Directory? directory = await getExternalStorageDirectory();
-      final File file = File('${directory!.path}/export.tsv');
+      final File file = File('${directory!.path}/export.txt');
+      print(words.length);
       for (var word in words) {
+        if (withTTS)
+          tts.synthesizeToFile(word.sentence,
+              "${word.word + word.sentence.split(' ').first}.mp3");
         await file.writeAsString(
-          '${word.word}\t${word.sentence}\t${word.translation}\n',
-          mode: FileMode.write,
+          '${word.word}\t${word.sentence}\t${word.translation}\t${word.audioReference}\n',
+          mode: FileMode.append,
         );
       }
       showToast('Saved to:\n\n ${directory.path}/export.tsv');

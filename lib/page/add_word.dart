@@ -69,9 +69,6 @@ class _AddWordDialogState extends State<AddWordDialog> {
                 border: OutlineInputBorder(),
                 hintText: 'Enter translation',
               ),
-              // validator: (valWord) => valWord != null && valWord.isEmpty
-              //     ? 'Enter a translation'
-              //     : null,
             ),
             SizedBox(height: 8),
             TextFormField(

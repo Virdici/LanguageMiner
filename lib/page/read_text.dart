@@ -37,9 +37,9 @@ class _ReadTextState extends State<ReadText> {
   double scrollPosition = 0;
   late Settings settings;
   double appBarSize = 50;
-  //tts
-
+  bool isTTsEnabled = true;
   final FlutterTts tts = FlutterTts();
+  bool isMenuShown = false;
 
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
@@ -68,7 +68,6 @@ class _ReadTextState extends State<ReadText> {
       });
     });
     Future.delayed(Duration.zero, () => setPosition(context));
-    //tts
     tts.setLanguage('de');
     tts.setSpeechRate(0.5);
   }
@@ -137,98 +136,147 @@ class _ReadTextState extends State<ReadText> {
         child: appBar(),
         preferredSize: Size.fromHeight(appBarSize),
       ),
-      body: GestureDetector(
-        onDoubleTap: () {
-          setState(() {
-            if (appBarSize == 50) {
-              appBarSize = 0;
-            } else {
-              appBarSize = 50;
-            }
-          });
-        },
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: paddingSize),
-          child: ListView.builder(
-              controller: scrollController,
-              itemCount: paragraphsList.length,
-              itemBuilder: (context, index) {
-                return textSpan(paragraphsList[index]);
-              }),
-        ),
+      body: Stack(
+        alignment: Alignment.topRight,
+        children: [
+          GestureDetector(
+            onTap: () {
+              if (isMenuShown) {
+                setState(() {
+                  isMenuShown = false;
+                });
+              }
+            },
+            onDoubleTap: () {
+              setState(() {
+                if (appBarSize == 50) {
+                  appBarSize = 0;
+                } else {
+                  appBarSize = 50;
+                }
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: paddingSize),
+              child: ListView.builder(
+                  controller: scrollController,
+                  itemCount: paragraphsList.length,
+                  itemBuilder: (context, index) {
+                    return textSpan(paragraphsList[index]);
+                  }),
+            ),
+          ),
+          customAppBar(),
+        ],
       ),
     );
+  }
+
+  Widget customAppBar() {
+    if (isMenuShown) {
+      return Container(
+        height: 250,
+        width: 220,
+        color: Colors.grey[900],
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+              child: GestureDetector(
+                onTap: () {},
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Text size: ' + fontSize.round().toString(),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    Slider(
+                      max: 32,
+                      min: 8,
+                      value: fontSize,
+                      onChanged: (value) {
+                        setState(() {
+                          fontSize = value;
+                          settings.setfontSize(value);
+                        });
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
+              child: GestureDetector(
+                onTap: () {},
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Padding size: ' + paddingSize.round().toString(),
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    Slider(
+                      max: 32,
+                      min: 0,
+                      value: paddingSize,
+                      onChanged: (value) {
+                        setState(() {
+                          paddingSize = value;
+                          settings.setPadding(value);
+                        });
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: GestureDetector(
+                onTap: () {},
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'TTS',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    Switch(
+                        value: isTTsEnabled,
+                        onChanged: (value) {
+                          setState(() {
+                            isTTsEnabled = value;
+                            print(isTTsEnabled);
+                          });
+                        })
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container();
+    }
   }
 
   AppBar appBar() {
     return AppBar(
       title: Text(titleController.text),
       actions: [
-        IconButton(
-          onPressed: () {
-            tts.speak('„Ich glaube, wir haben Schwein gehabt“, sagte Peter.');
-            tts.synthesizeToFile(
-                '„Ich glaube, wir haben Schwein gehabt“, sagte Peter.',
-                'ayo.mp3');
-          },
-          icon: Icon(Icons.play_arrow),
-        ),
-        PopupMenuButton(
-          color: Colors.grey,
-          icon: Icon(Icons.menu),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('font size'),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: decreaseTextSize,
-                        icon: Icon(Icons.remove),
-                        color: Colors.black,
-                      ),
-                      IconButton(
-                        onPressed: increaseTextSize,
-                        icon: Icon(
-                          Icons.add,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              value: 0,
-            ),
-            PopupMenuItem(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Padding Size'),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: decreasePadding,
-                        icon: Icon(Icons.remove),
-                        color: Colors.black,
-                      ),
-                      IconButton(
-                        onPressed: increasePadding,
-                        icon: Icon(
-                          Icons.add,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              value: 0,
-            ),
-          ],
-        )
+        Padding(
+            padding: EdgeInsets.only(right: 20.0),
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  isMenuShown = !isMenuShown;
+                });
+              },
+              child: Icon(Icons.more_vert),
+            )),
       ],
     );
   }
@@ -256,10 +304,9 @@ class _ReadTextState extends State<ReadText> {
               WordController.checkIfExists(words[i], selectedSentence)
                   ? showToast('Term already saved')
                   : modalDefinitions(dictTerms, words[i]),
-              // modalSentence(words[i]),
             },
             onLongPress: () {
-              tts.speak(text);
+              if (isTTsEnabled) tts.speak(text);
             },
           )
       ],
@@ -268,7 +315,7 @@ class _ReadTextState extends State<ReadText> {
 
   Future modalDefinitions(
       List<Map<dynamic, dynamic>> definitions, String word) {
-    tts.speak(word);
+    if (isTTsEnabled) tts.speak(word);
     return showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
@@ -291,9 +338,7 @@ class _ReadTextState extends State<ReadText> {
                     ),
                   ),
                   for (var i = 0; i < definitions.length; i++)
-                    // Text(definitions[i]['definition'].toString())
                     definitionCard(definitions[i])
-                  // Text(definitions.length.toString())
                 ],
               ),
             ),
@@ -324,9 +369,12 @@ class _ReadTextState extends State<ReadText> {
               ),
             ),
           ),
-          onTap: () {
+          onTap: () async {
             WordController.addWord(
-                selectedWord, definitionFormated, selectedSentence);
+                selectedWord,
+                definitionFormated,
+                selectedSentence,
+                '[sound:${selectedWord + selectedSentence.split(' ').first}.mp3]');
             Navigator.pop(context);
           }),
     );
