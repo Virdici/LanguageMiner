@@ -261,7 +261,7 @@ class _WordsPageState extends State<WordsPage> {
     }
     if (status.isGranted) {
       final Directory? directory = await getExternalStorageDirectory();
-      final File file = File('${directory!.path}/export.txt');
+      final File file = File('${directory!.path}/export.tsv');
       print(words.length);
       for (var word in words) {
         if (withTTS)
