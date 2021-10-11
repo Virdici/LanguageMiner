@@ -46,9 +46,9 @@ class Settings {
 
   double getScrollPosition() {
     double? position = _sp.getDouble('scrollPosition');
-    // if (position == null) {
-    //   position = 0;
-    // }
-    return position!;
+    if (position == null) {
+      position = 0;
+    }
+    return position;
   }
 }

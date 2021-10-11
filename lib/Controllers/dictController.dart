@@ -33,8 +33,8 @@ class DictController {
 
     var data = await db.rawQuery(
         'select term,definition from definitions where term like "$term"');
-    await db.close();
 
+    await db.close();
     // print("is db open: " + db.isOpen.toString());
 
     List<Map<String, Object?>> goodData = new List.empty(growable: true);
@@ -42,6 +42,7 @@ class DictController {
       Map<String, Object?> newDefinition = Map();
       if (term['definition'].toString().contains(';')) {
         List<String> definitions = term['definition'].toString().split('; ');
+        print(term['definition'].toString().split('. ').first);
         for (var definition in definitions) {
           newDefinition = {
             'term': term['term'],

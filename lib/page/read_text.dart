@@ -7,6 +7,7 @@ import 'package:language_miner/Controllers/settings.dart';
 import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/wordModel.dart';
 import '../model/textModel.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ReadText extends StatefulWidget {
   final TextModel? text;
@@ -36,6 +37,9 @@ class _ReadTextState extends State<ReadText> {
   double scrollPosition = 0;
   late Settings settings;
   double appBarSize = 50;
+  //tts
+
+  final FlutterTts tts = FlutterTts();
 
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
@@ -64,6 +68,9 @@ class _ReadTextState extends State<ReadText> {
       });
     });
     Future.delayed(Duration.zero, () => setPosition(context));
+    //tts
+    tts.setLanguage('de');
+    tts.setSpeechRate(0.5);
   }
 
   void setPosition(BuildContext context) {
@@ -157,6 +164,12 @@ class _ReadTextState extends State<ReadText> {
     return AppBar(
       title: Text(titleController.text),
       actions: [
+        IconButton(
+          onPressed: () {
+            tts.speak('„Ich glaube, wir haben Schwein gehabt“, sagte Peter.');
+          },
+          icon: Icon(Icons.play_arrow),
+        ),
         PopupMenuButton(
           color: Colors.grey,
           icon: Icon(Icons.menu),
@@ -241,6 +254,9 @@ class _ReadTextState extends State<ReadText> {
                   : modalDefinitions(dictTerms, words[i]),
               // modalSentence(words[i]),
             },
+            onLongPress: () {
+              tts.speak(text);
+            },
           )
       ],
     );
@@ -248,6 +264,7 @@ class _ReadTextState extends State<ReadText> {
 
   Future modalDefinitions(
       List<Map<dynamic, dynamic>> definitions, String word) {
+    tts.speak(word);
     return showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {

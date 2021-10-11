@@ -84,12 +84,8 @@ class _WordsPageState extends State<WordsPage> {
           } else {
             return Column(
               children: [
-                SizedBox(
-                  height: 8,
-                ),
                 Expanded(
                     child: ListView.builder(
-                  padding: EdgeInsets.all(10),
                   itemCount: words.length,
                   itemBuilder: (BuildContext context, int index) {
                     final word = words[index];
@@ -106,22 +102,27 @@ class _WordsPageState extends State<WordsPage> {
 
   Widget wordCard(WordModel word, int i) {
     return Card(
-        color: Colors.white,
+        color: Colors.grey[700],
         child: ExpansionTile(
-          tilePadding: EdgeInsets.fromLTRB(24, 8, 24, 2),
+          collapsedIconColor: Colors.white,
+          collapsedTextColor: Colors.white,
+          textColor: Colors.white,
+          iconColor: Colors.white,
+          tilePadding: EdgeInsets.symmetric(horizontal: 24),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 word.word,
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                    fontSize: 24),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
               ),
               Row(
                 children: [
                   IconButton(
+                    color: Colors.white,
                     onPressed: () => showDialog(
                       context: context,
                       builder: (context) => AddWordDialog(
@@ -133,6 +134,7 @@ class _WordsPageState extends State<WordsPage> {
                     icon: Icon(Icons.edit),
                   ),
                   IconButton(
+                    color: Colors.white,
                     onPressed: () => WordController.deleteWord(word),
                     icon: Icon(Icons.delete),
                   ),
@@ -145,15 +147,38 @@ class _WordsPageState extends State<WordsPage> {
               child: Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, 8, 64, 2),
+                    padding: EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                            child: Text(word.translation!),
-                            alignment: Alignment.centerLeft),
-                        Align(
-                            child: Text(word.sentence),
-                            alignment: Alignment.centerLeft),
+                        Text(
+                          'Definition:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "   " + word.translation!,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        SizedBox(
+                          height: 12,
+                        ),
+                        Text(
+                          'Sentence:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "   " + word.sentence,
+                          style: TextStyle(color: Colors.white),
+                        ),
                         SizedBox(
                           height: 12,
                         )
@@ -179,7 +204,7 @@ class _WordsPageState extends State<WordsPage> {
       for (var word in words) {
         await file.writeAsString(
           '${word.word}\t${word.sentence}\t${word.translation}\n',
-          mode: FileMode.append,
+          mode: FileMode.write,
         );
       }
       showToast('Saved to:\n\n ${directory.path}/export.tsv');
