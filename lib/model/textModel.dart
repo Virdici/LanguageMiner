@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part 'textModel.g.dart';
+part './textModel.g.dart';
 
 @HiveType(typeId: 0)
 class TextModel extends HiveObject {

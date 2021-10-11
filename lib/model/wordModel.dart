@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part 'wordModel.g.dart';
+part './wordModel.g.dart';
 
 @HiveType(typeId: 1)
 class WordModel extends HiveObject {
@@ -15,4 +15,7 @@ class WordModel extends HiveObject {
 
   @HiveField(3)
   late DateTime timeAdded;
+
+  @HiveField(4)
+  late String audioReference;
 }

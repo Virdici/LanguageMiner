@@ -15,7 +15,29 @@ void main() async {
 
   runApp(MaterialApp(
     title: 'yap',
-    home: MyApp(),
+    theme: ThemeData(
+        primaryColor: Colors.grey[900],
+        backgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            selectedItemColor: Colors.green[400],
+            backgroundColor: Colors.grey[900],
+            unselectedItemColor: Colors.grey[700]),
+        textTheme: TextTheme(
+          headline1: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenDyslexic'),
+          headline2: TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'OpenDyslexic'),
+        )),
+    routes: {
+      '/': (BuildContext context) => MyApp(),
+    },
   ));
 }
 
@@ -25,68 +47,46 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  int pageIndex = 0;
-  int testInt = 0;
-  late PageController _pageController;
+  int _pageIndex = 0;
   List<Widget> pages = [TextPg(), WordPg()];
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
   void changePage(int index) {
-    setState(() {
-      pageIndex = index;
-      _pageController.animateToPage(index,
-          duration: Duration(milliseconds: 200), curve: Curves.easeOut);
-    });
+    setState(() {});
+    _pageIndex = index;
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Scaffold(
-        // backgroundColor: Color(Colors.black.hashCode),
-        body: PageView(
-          controller: _pageController,
-          children: pages,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Texts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.label_important_rounded),
-              label: 'Words',
-            )
-          ],
-          currentIndex: pageIndex,
-          onTap: changePage,
-          selectedItemColor: Colors.green,
-        ),
+    return Scaffold(
+      body: Center(
+        child: pages.elementAt(_pageIndex),
       ),
-      onPanUpdate: (details) {
-        // Swiping in right direction.
-        if (details.delta.dx > 0) {
-          testInt > 1 ? testInt -= 1 : testInt = 0;
-          changePage(testInt);
-        }
-        // Swiping in left direction.
-        if (details.delta.dx < 0) {
-          testInt > 1 ? testInt += 1 : testInt = 1;
-          changePage(testInt);
-        }
-      },
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.auto_stories),
+            label: 'Texts',
+            backgroundColor: Colors.red,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.translate),
+            label: 'Words',
+            backgroundColor: Colors.green,
+          ),
+        ],
+        currentIndex: _pageIndex,
+        onTap: changePage,
+      ),
     );
   }
 }
@@ -126,82 +126,3 @@ class WordPg extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Future main() async {
-//   await Hive.initFlutter();
-//   Hive.registerAdapter(TextModelAdapter());
-//   await Hive.openBox<TextModel>('texts');
-
-//   runApp(MaterialApp(
-//     title: 'yap',
-//     home: Home(),
-//   ));
-// }
-
-// class Home extends StatefulWidget {
-//   @override
-//   _HomeState createState() => _HomeState();
-// }
-
-// class _HomeState extends State<Home> {
-//   int pageIndex = 0;
-
-//   List<Widget> pages = <Widget>[TextsPage(), WordsPage()];
-
-//   void onTap(int index) {
-//     setState(() {
-//       pageIndex = index;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('LangReader'),
-//       ),
-//       body: Center(
-//         child: pages.elementAt(pageIndex),
-//       ),
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: [
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.book),
-//             label: 'Texts',
-//           ),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.label_important_rounded),
-//             label: 'Words',
-//           )
-//         ],
-//         currentIndex: pageIndex,
-//         onTap: onTap,
-//         selectedItemColor: Colors.green,
-//       ),
-//     );
-//   }
-// }

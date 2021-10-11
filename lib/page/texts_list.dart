@@ -20,6 +20,31 @@ class _TextsPageState extends State<TextsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Texts'),
+        actions: [
+          TextButton(
+              child: Row(
+                children: <Widget>[
+                  Text(
+                    'Add',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Icon(
+                    Icons.add,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => AddTextDialog(
+                          onClickedDone: TextController.addText,
+                        ));
+              }),
+        ],
       ),
       body: ValueListenableBuilder<Box<TextModel>>(
         valueListenable: Hive.box<TextModel>('texts').listenable(),
@@ -28,19 +53,11 @@ class _TextsPageState extends State<TextsPage> {
           return buildContent(texts);
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => showDialog(
-            context: context,
-            builder: (context) => AddTextDialog(
-                  onClickedDone: TextController.addText,
-                )),
-      ),
     );
   }
 
-  Widget buildContent(List<TextModel> transactions) {
-    if (transactions.isEmpty) {
+  Widget buildContent(List<TextModel> texts) {
+    if (texts.isEmpty) {
       return Center(
         child: Text(
           'No texts here!',
@@ -50,14 +67,12 @@ class _TextsPageState extends State<TextsPage> {
     } else {
       return Column(
         children: [
-          SizedBox(height: 24),
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.all(8),
-              itemCount: transactions.length,
+              itemCount: texts.length,
               itemBuilder: (BuildContext context, int index) {
-                final transaction = transactions[index];
-                return buildTransaction(context, transaction);
+                final text = texts[index];
+                return buildText(context, text);
               },
             ),
           ),
@@ -66,13 +81,17 @@ class _TextsPageState extends State<TextsPage> {
     }
   }
 
-  Widget buildTransaction(BuildContext context, TextModel text) {
+  Widget buildText(BuildContext context, TextModel text) {
     final date = DateFormat.yMMMd().format(text.timeCreated);
 
     return Card(
-      color: Colors.white,
+      color: Colors.grey[700],
       child: ExpansionTile(
-        tilePadding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        collapsedIconColor: Colors.white,
+        collapsedTextColor: Colors.white,
+        textColor: Colors.white,
+        iconColor: Colors.white,
+        tilePadding: EdgeInsets.symmetric(horizontal: 24),
         title: Text(
           text.title,
           maxLines: 2,
@@ -80,14 +99,18 @@ class _TextsPageState extends State<TextsPage> {
         ),
         subtitle: Row(
           children: [
-            Text(date),
+            Text(
+              date,
+            ),
             SizedBox(width: 26),
-            Text('Sentences: ' +
-                text.contents
-                    .split(RegExp(
-                        r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)"))
-                    .length
-                    .toString()),
+            Text(
+              'Sentences: ' +
+                  text.contents
+                      .split(RegExp(
+                          r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)"))
+                      .length
+                      .toString(),
+            )
           ],
         ),
         children: [
@@ -101,8 +124,14 @@ class _TextsPageState extends State<TextsPage> {
         children: [
           Expanded(
             child: TextButton.icon(
-              label: Text('Read'),
-              icon: Icon(Icons.book),
+              label: Text(
+                'Read',
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                Icons.book,
+                color: Colors.white,
+              ),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ReadText(
@@ -114,8 +143,14 @@ class _TextsPageState extends State<TextsPage> {
           ),
           Expanded(
             child: TextButton.icon(
-                label: Text('Edit'),
-                icon: Icon(Icons.edit),
+                label: Text(
+                  'Edit',
+                  style: TextStyle(color: Colors.white),
+                ),
+                icon: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                ),
                 onPressed: () => showDialog(
                     context: context,
                     builder: (context) => AddTextDialog(
@@ -125,38 +160,17 @@ class _TextsPageState extends State<TextsPage> {
           ),
           Expanded(
             child: TextButton.icon(
-              label: Text('Delete'),
-              icon: Icon(Icons.delete),
+              label: Text(
+                'Delete',
+                style: TextStyle(color: Colors.white),
+              ),
+              icon: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
               onPressed: () => TextController.deleteText(text),
             ),
           )
         ],
       );
-
-  // void editText(TextModel text, String title, String contents) {
-  //   text.title = title;
-  //   text.contents = contents;
-
-  //   text.save();
-  // }
-
-  // void deleteTransaction(TextModel text) {
-  //   text.delete();
-  // }
-
-  // Future addText(String title, String contents) async {
-  //   final text = TextModel()
-  //     ..title = title
-  //     ..contents = contents
-  //     ..timeCreated = DateTime.now();
-
-  //   final box = Hive.box<TextModel>('texts');
-  //   box.add(text);
-  // }
-
-  // @override
-  // void dispose() {
-  //   Hive.close();
-  //   super.dispose();
-  // }
 }

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:language_miner/Controllers/wordController.dart';
@@ -32,22 +34,104 @@ class _WordsPageState extends State<WordsPage> {
       appBar: new AppBar(
         title: Text('Words'),
         actions: [
-          IconButton(
-            onPressed: () async {
-              exportTsv();
-            },
-            icon: Icon(Icons.import_export),
-          ),
-          IconButton(
-            onPressed: () {
-              box.clear();
-            },
-            icon: Icon(Icons.delete),
-          ),
-          IconButton(
-            onPressed: _checkPermission,
-            icon: Icon(Icons.gps_fixed),
-          ),
+          PopupMenuButton(
+              color: Colors.grey,
+              icon: Icon(Icons.menu),
+              itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Export',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.import_export,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () async {
+                            exportTsv(false);
+                          }),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Export with tts',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.import_export,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () async {
+                            exportTsv(true);
+                          }),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Delete words',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () {
+                            box.clear();
+                          }),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Delete storage',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Icon(
+                                Icons.delete_forever_outlined,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                          onPressed: () async {
+                            List files = new List.empty(growable: true);
+                            final Directory? directory =
+                                await getExternalStorageDirectory();
+                            files = Directory("${directory!.path}/").listSync();
+                            for (File file in files)
+                              file.delete(recursive: true);
+                          }),
+                    ),
+                  ])
         ],
       ),
       body: ValueListenableBuilder<Box<WordModel>>(
@@ -61,64 +145,61 @@ class _WordsPageState extends State<WordsPage> {
           } else {
             return Column(
               children: [
-                SizedBox(
-                  height: 8,
-                ),
                 Expanded(
                     child: ListView.builder(
-                  padding: EdgeInsets.all(10),
                   itemCount: words.length,
                   itemBuilder: (BuildContext context, int index) {
                     final word = words[index];
                     return wordCard(word, words.length);
                   },
-                ))
+                )),
               ],
             );
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () => showDialog(
-              // wordBox.clear(); //clear box
-              context: context,
-              builder: (context) => AddWordDialog(
-                    onClickedDone: WordController.addWord,
-                  ))),
     );
   }
 
   Widget wordCard(WordModel word, int i) {
     return Card(
-        color: Colors.white,
+        color: Colors.grey[700],
         child: ExpansionTile(
-          tilePadding: EdgeInsets.fromLTRB(24, 8, 24, 2),
+          collapsedIconColor: Colors.white,
+          collapsedTextColor: Colors.white,
+          textColor: Colors.white,
+          iconColor: Colors.white,
+          tilePadding: EdgeInsets.symmetric(horizontal: 24),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    word.word,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                        fontSize: 24),
-                  ),
-                  Container(
-                    child: Text(
-                      word.translation!,
-                      softWrap: true,
-                    ),
-                  )
-                ],
+              Text(
+                word.word,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
               ),
-              IconButton(
-                onPressed: () => WordController.deleteWord(word),
-                icon: Icon(Icons.delete),
+              Row(
+                children: [
+                  IconButton(
+                    color: Colors.white,
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => AddWordDialog(
+                          word: word,
+                          onClickedDone: (wordName, translation, sentence) =>
+                              WordController.editText(
+                                  word, wordName, translation, sentence)),
+                    ),
+                    icon: Icon(Icons.edit),
+                  ),
+                  IconButton(
+                    color: Colors.white,
+                    onPressed: () => WordController.deleteWord(word),
+                    icon: Icon(Icons.delete),
+                  ),
+                ],
               )
             ],
           ),
@@ -127,22 +208,40 @@ class _WordsPageState extends State<WordsPage> {
               child: Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, 8, 64, 2),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(word.sentence),
-                        IconButton(
-                          onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) => AddWordDialog(
-                                word: word,
-                                onClickedDone: (wordName, translation,
-                                        sentence) =>
-                                    WordController.editText(
-                                        word, wordName, translation, sentence)),
+                        Text(
+                          'Definition:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white,
                           ),
-                          icon: Icon(Icons.edit),
+                        ),
+                        Text(
+                          "   " + word.translation!,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        SizedBox(
+                          height: 12,
+                        ),
+                        Text(
+                          'Sentence:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          "   " + word.sentence,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        SizedBox(
+                          height: 12,
                         )
                       ],
                     ),
@@ -152,26 +251,30 @@ class _WordsPageState extends State<WordsPage> {
         ));
   }
 
-  void exportTsv() async {
+  void exportTsv(bool withTTS) async {
     var words = box.values.toList().cast<WordModel>();
+    final FlutterTts tts = FlutterTts();
 
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request();
     }
     if (status.isGranted) {
-      // final Directory directory = await getApplicationDocumentsDirectory();
       final Directory? directory = await getExternalStorageDirectory();
-      final File file = File('${directory!.path}/export.tsv');
-      print('${directory.path}/my_file.txt');
+      final File file = File('${directory!.path}/export.txt');
+      print(words.length);
       for (var word in words) {
+        if (withTTS)
+          tts.synthesizeToFile(word.sentence,
+              "${word.word + word.sentence.split(' ').first}.mp3");
         await file.writeAsString(
-          '${word.word}\t${word.sentence}\t${word.translation}\n',
+          '${word.word}\t${word.sentence}\t${word.translation}\t${word.audioReference}\n',
           mode: FileMode.append,
         );
       }
+      showToast('Saved to:\n\n ${directory.path}/export.tsv');
     }
   }
 
-  Future<void> _checkPermission() async {}
+  void showToast(String message) => Fluttertoast.showToast(msg: message);
 }

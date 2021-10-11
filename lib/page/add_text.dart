@@ -47,54 +47,70 @@ class _TextDialogState extends State<AddTextDialog> {
     final title = isEditing ? 'Edit text' : 'Add text';
     print(isEditing);
 
-    return AlertDialog(
-      title: Text(title),
-      content: Form(
+    return returnDialog(title, context, isEditing);
+  }
+
+  Widget returnDialog(String title, BuildContext context, bool isEditing) {
+    return Dialog(
+      insetPadding: EdgeInsets.symmetric(horizontal: 10),
+      child: Form(
         key: formKey,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SizedBox(height: 8),
+              SizedBox(height: 26),
               buildTitle(),
-              SizedBox(height: 8),
+              SizedBox(height: 24),
               buildContents(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  buildCancelButton(context),
+                  buildAddButton(context, isEditing: isEditing),
+                ],
+              )
             ],
           ),
         ),
       ),
-      actions: <Widget>[
-        buildCancelButton(context),
-        buildAddButton(context, isEditing: isEditing),
-      ],
     );
   }
 
-  Widget buildTitle() => TextFormField(
-        controller: titleController,
-        keyboardType: TextInputType.multiline,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: 'Enter Title',
+  Widget buildTitle() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TextFormField(
+          controller: titleController,
+          keyboardType: TextInputType.multiline,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'Enter Title',
+          ),
+          validator: (name) =>
+              name != null && name.isEmpty ? 'Enter a title' : null,
         ),
-        validator: (name) =>
-            name != null && name.isEmpty ? 'Enter a title' : null,
       );
 
-  Widget buildContents() => TextFormField(
-        controller: contentsController,
-        keyboardType: TextInputType.multiline,
-        maxLines: null,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          hintText: 'Enter Contents',
+  Widget buildContents() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TextFormField(
+          controller: contentsController,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: 'Enter Contents',
+          ),
+          validator: (name) =>
+              name != null && name.isEmpty ? 'Enter a contents' : null,
         ),
-        validator: (name) =>
-            name != null && name.isEmpty ? 'Enter a contents' : null,
       );
 
   Widget buildCancelButton(BuildContext context) => TextButton(
-        child: Text('Cancel'),
+        child: Text(
+          'Cancel',
+          style: TextStyle(color: Colors.red),
+        ),
         onPressed: () => Navigator.of(context).pop(),
       );
 

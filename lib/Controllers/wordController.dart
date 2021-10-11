@@ -15,15 +15,28 @@ class WordController {
     wordModel.delete();
   }
 
-  static Future addWord(
-      String word, String translation, String sentence) async {
+  static Future addWord(String word, String translation, String sentence,
+      String audioReference) async {
     final wordToAdd = WordModel()
       ..word = word
       ..sentence = sentence
       ..translation = translation
+      ..audioReference = audioReference
       ..timeAdded = DateTime.now();
 
     final box = Hive.box<WordModel>('words');
     box.add(wordToAdd);
+  }
+
+  static bool checkIfExists(String term, String sentence) {
+    var box = Hive.box<WordModel>('words');
+    var terms = box.values.where(
+        (element) => element.word == term && element.sentence == sentence);
+
+    if (terms.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
