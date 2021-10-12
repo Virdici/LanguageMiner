@@ -14,3 +14,12 @@ Language Miner is a simple app to help with learning language(currently only ger
 ![App in texts view](screenshots/Screenshot1.jpg)
 ![App after look up](screenshots/Screenshot2.jpg)
 ![App in words view](screenshots/Screenshot3.jpg)
+
+## Reading features
+
+* Font size
+* Padding size
+* 3 fonts
+* Tts (reading selected word on tap or sentence on long press)
+
+
