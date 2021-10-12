@@ -14,7 +14,6 @@ void main() async {
     ..registerAdapter(WordModelAdapter());
 
   runApp(MaterialApp(
-    title: 'yap',
     theme: ThemeData(
         primaryColor: Colors.grey[900],
         backgroundColor: Colors.black,
