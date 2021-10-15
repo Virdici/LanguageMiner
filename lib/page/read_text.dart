@@ -70,14 +70,14 @@ class _ReadTextState extends State<ReadText> {
         isTTsEnabled = settings.getTts();
       });
     });
-    Future.delayed(Duration(microseconds: 1), () => setPosition(context));
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
+    Future.delayed(Duration(microseconds: 100), () => setPosition(context));
   }
 
   void setPosition(BuildContext context) {
     scrollController.animateTo(scrollPosition,
-        duration: new Duration(microseconds: 0), curve: Curves.bounceIn);
+        duration: Duration(microseconds: 1), curve: Curves.bounceIn);
   }
 
   @override
@@ -86,9 +86,10 @@ class _ReadTextState extends State<ReadText> {
       ..addListener(() {
         scrollPosition = scrollController.offset;
       });
-    Timer.periodic(Duration(seconds: 2), (timer) {
+    Timer.periodic(Duration(milliseconds: 50), (timer) {
       settings.setScrollPosition(scrollPosition);
     });
+
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
@@ -111,164 +112,114 @@ class _ReadTextState extends State<ReadText> {
               padding: EdgeInsets.symmetric(horizontal: paddingSize),
               child: ListView.builder(
                   controller: scrollController,
-                  itemCount: paragraphsList.length,
+                  addAutomaticKeepAlives: false,
+                  cacheExtent: 100,
                   itemBuilder: (context, index) {
                     return textSpan(paragraphsList[index]);
                   }),
             ),
           ),
-          customAppBar(),
         ],
       ),
     );
   }
 
-  Widget customAppBar() {
-    if (isMenuShown) {
-      return Container(
-        height: 280,
-        width: 220,
+  AppBar appBar() {
+    return AppBar(title: Text(titleController.text), actions: [
+      PopupMenuButton(
         color: Colors.grey[900],
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
-              child: GestureDetector(
-                onTap: () {},
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Text size: ' + fontSize.round().toString(),
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    Slider(
-                      max: 32,
-                      min: 8,
-                      value: fontSize,
-                      onChanged: (value) {
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                children: [
+                  Text(
+                    'Text size: ${fontSize.round()}',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Slider(
+                    max: 44,
+                    min: 12,
+                    divisions: 8,
+                    value: fontSize,
+                    onChanged: (value) {
+                      innerSetState(() {
                         setState(() {
                           fontSize = value;
                           settings.setfontSize(value);
                         });
-                      },
-                    )
-                  ],
-                ),
+                      });
+                    },
+                  )
+                ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
-              child: GestureDetector(
-                onTap: () {},
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Padding size: ' + paddingSize.round().toString(),
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    Slider(
-                      max: 32,
-                      min: 0,
-                      value: paddingSize,
-                      onChanged: (value) {
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                children: [
+                  Text(
+                    'Padding size: ${paddingSize.round()}',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Slider(
+                    max: 64,
+                    min: 0,
+                    divisions: 8,
+                    value: paddingSize,
+                    onChanged: (value) {
+                      innerSetState(() {
                         setState(() {
                           paddingSize = value;
                           settings.setPadding(value);
                         });
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'TTS',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  Switch(
-                      value: isTTsEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          isTTsEnabled = value;
-                          settings.setTts(isTTsEnabled);
-                        });
-                      })
+                      });
+                    },
+                  )
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: GestureDetector(
-                onTap: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Font',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    DropdownButton(
-                      value: fontName,
-                      focusColor: Colors.white,
-                      dropdownColor: Colors.grey[700],
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          fontName = newValue!;
-                          settings.setFontFamily(fontName);
-                        });
-                      },
-                      items: <String>[
-                        'Dayrom',
-                        'LouisGeorgeCafe',
-                        'OpenDyslexic'
-                      ].map<DropdownMenuItem<String>>(
-                        (String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: value),
-                            ),
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ],
+          ),
+          PopupMenuItem(
+              child: StatefulBuilder(
+            builder: (context, innerSetState) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Font',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
-              ),
+                DropdownButton(
+                  value: fontName,
+                  focusColor: Colors.white,
+                  dropdownColor: Colors.grey[700],
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      fontName = newValue!;
+                      settings.setFontFamily(fontName);
+                    });
+                  },
+                  items: <String>['Dayrom', 'LouisGeorgeCafe', 'OpenDyslexic']
+                      .map<DropdownMenuItem<String>>(
+                    (String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style:
+                              TextStyle(color: Colors.white, fontFamily: value),
+                        ),
+                      );
+                    },
+                  ).toList(),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    } else {
-      return Container();
-    }
-  }
-
-  AppBar appBar() {
-    return AppBar(
-      title: Text(titleController.text),
-      actions: [
-        Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  isMenuShown = !isMenuShown;
-                });
-              },
-              child: Icon(Icons.more_vert),
-            )),
-      ],
-    );
+          ))
+        ],
+      )
+    ]);
   }
 
   Widget textSpan(String text) {
