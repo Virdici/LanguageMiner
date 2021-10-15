@@ -35,7 +35,6 @@ class _ReadTextState extends State<ReadText> {
   ScrollController scrollController = new ScrollController();
   double fontSize = 12;
   double paddingSize = 0;
-  double scrollPosition = 0;
   int scrollPositionIndexed = 0;
   late Settings settings;
   double appBarSize = 50;
@@ -43,6 +42,8 @@ class _ReadTextState extends State<ReadText> {
   final FlutterTts tts = FlutterTts();
   bool isMenuShown = false;
   String fontName = 'Dayrom';
+
+  List<String>? bookmarks = new List.empty(growable: true);
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -71,10 +72,10 @@ class _ReadTextState extends State<ReadText> {
       setState(() {
         fontSize = settings.getfontSize();
         paddingSize = settings.getPadding();
-        // scrollPosition = settings.getScrollPosition();
         scrollPositionIndexed = settings.getScrollPositionIndexed();
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
+        bookmarks = settings.getBookmarks();
       });
     });
     tts.setLanguage('de');
@@ -83,20 +84,12 @@ class _ReadTextState extends State<ReadText> {
   }
 
   void setPosition(BuildContext context) {
-    // scrollController.animateTo(scrollPosition,
-    //     duration: Duration(milliseconds: 1), curve: Curves.easeIn);
     itemScrollController.jumpTo(index: scrollPositionIndexed);
   }
 
   @override
   Widget build(BuildContext context) {
-    // scrollController = ScrollController() //get scroll position
-    //   ..addListener(() {
-    //     scrollPosition = scrollController.offset;
-    //     print(scrollController.position.maxScrollExtent);
-    //   });
-    Timer.periodic(Duration(milliseconds: 5), (timer) {
-      // settings.setScrollPosition(scrollPosition);
+    Timer.periodic(Duration(seconds: 1), (timer) {
       settings.setScrollPositionIndexed(
           itemPositionsListener.itemPositions.value.first.index);
     });
@@ -121,9 +114,10 @@ class _ReadTextState extends State<ReadText> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: paddingSize),
               child: ScrollablePositionedList.builder(
+                  itemCount: paragraphsList.length,
                   itemScrollController: itemScrollController,
                   itemPositionsListener: itemPositionsListener,
-                  itemCount: paragraphsList.length,
+                  addAutomaticKeepAlives: true,
                   itemBuilder: (context, index) {
                     return textSpan(paragraphsList[index]);
                   }),
@@ -142,6 +136,76 @@ class _ReadTextState extends State<ReadText> {
 
   AppBar appBar() {
     return AppBar(title: Text(titleController.text), actions: [
+      PopupMenuButton(
+        icon: Icon(Icons.bookmark),
+        color: Colors.grey[900],
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Bookmarks',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            bookmarks!.add(itemPositionsListener
+                                .itemPositions.value.first.index
+                                .toString());
+                            innerSetState(() {
+                              setState(() {
+                                settings.saveBookmarks(bookmarks!);
+                              });
+                            });
+                          },
+                          icon: Icon(Icons.add))
+                    ],
+                  ),
+                  Container(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          for (var bookmark in bookmarks!)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  child: Text(
+                                    "sentence: $bookmark",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  onTap: () {
+                                    itemScrollController.jumpTo(
+                                        index: int.parse(bookmark));
+                                  },
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    innerSetState(() {
+                                      setState(() {
+                                        bookmarks!.remove(bookmark);
+                                      });
+                                    });
+                                  },
+                                  icon: Icon(Icons.delete),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
       PopupMenuButton(
         color: Colors.grey[900],
         itemBuilder: (context) => [
@@ -234,44 +298,37 @@ class _ReadTextState extends State<ReadText> {
               ),
             ),
           ),
-          PopupMenuItem(
-            child: StatefulBuilder(
-              builder: (context, innerSetState) => Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Bookmarks',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  Container(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [bookark('2263')],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       )
     ]);
   }
 
   Widget bookark(String sentence) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          "sentence: $sentence",
-          style: TextStyle(color: Colors.white),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.delete),
-        ),
-      ],
+    return StatefulBuilder(
+      builder: (context, innerSetState) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            child: Text(
+              "sentence: $sentence",
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              itemScrollController.jumpTo(index: int.parse(sentence));
+            },
+          ),
+          IconButton(
+            onPressed: () {
+              innerSetState(() {
+                setState(() {
+                  bookmarks!.remove(sentence);
+                });
+              });
+            },
+            icon: Icon(Icons.delete),
+          ),
+        ],
+      ),
     );
   }
 
@@ -376,9 +433,6 @@ class _ReadTextState extends State<ReadText> {
 
   @override
   void dispose() {
-    // settings.setScrollPosition(scrollPosition);
-    // settings.setScrollPositionIndexed(
-    //     itemPositionsListener.itemPositions.value.first.index);
     super.dispose();
     settings.setScrollPositionIndexed(
         itemPositionsListener.itemPositions.value.first.index);

@@ -4,7 +4,6 @@ import 'dart:async';
 class Settings {
   static late SharedPreferences _sp;
   static Settings? _instance;
-  List<String> bookmarks = new List.empty(growable: true);
 
   Settings._internal();
   factory Settings() {
@@ -89,11 +88,15 @@ class Settings {
     return position;
   }
 
-  Future<bool> saveBookmark() async {
-    return await _sp.setStringList("bookmarks", bookmarks);
+  Future saveBookmarks(List<String> bookmarks) async {
+    _sp.setStringList("bookmarks", bookmarks);
   }
 
-  List<String>? getBookmarks() {
-    return _sp.getStringList("bookmarks");
+  List<String> getBookmarks() {
+    List<String>? bookmarks = _sp.getStringList("bookmarks");
+    if (bookmarks == null) {
+      return bookmarks = new List.empty(growable: true);
+    }
+    return bookmarks;
   }
 }
