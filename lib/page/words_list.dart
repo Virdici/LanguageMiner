@@ -18,6 +18,8 @@ class WordsPage extends StatefulWidget {
 
 class _WordsPageState extends State<WordsPage> {
   late Box box;
+  double ttsSpeed = 1;
+  final FlutterTts tts = FlutterTts();
   Future initBox() async {
     box = await Hive.openBox<WordModel>('words');
   }
@@ -35,7 +37,7 @@ class _WordsPageState extends State<WordsPage> {
         title: Text('Words'),
         actions: [
           PopupMenuButton(
-              color: Colors.grey,
+              color: Colors.grey[850],
               icon: Icon(Icons.menu),
               itemBuilder: (context) => [
                     PopupMenuItem(
@@ -59,6 +61,64 @@ class _WordsPageState extends State<WordsPage> {
                           onPressed: () async {
                             exportTsv(false);
                           }),
+                    ),
+                    PopupMenuItem(
+                      child: StatefulBuilder(
+                        builder: (context, innerSetState) => Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  ' Tts speed: $ttsSpeed',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 18,
+                                ),
+                                TextButton(
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        'test',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      Icon(
+                                        Icons.play_arrow,
+                                        color: Colors.white,
+                                      )
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    tts.speak(
+                                        "Es wird die Geschwindigkeit eines Sprachsynthesizers");
+                                  },
+                                ),
+                              ],
+                            ),
+                            Slider(
+                              max: 1.5,
+                              min: 0.5,
+                              divisions: 10,
+                              value: ttsSpeed,
+                              onChanged: (value) {
+                                innerSetState(() {
+                                  setState(() {
+                                    ttsSpeed = value;
+                                    tts.setSpeechRate(ttsSpeed);
+                                  });
+                                });
+                              },
+                            )
+                          ],
+                        ),
+                      ),
                     ),
                     PopupMenuItem(
                       child: TextButton(
@@ -253,7 +313,6 @@ class _WordsPageState extends State<WordsPage> {
 
   void exportTsv(bool withTTS) async {
     var words = box.values.toList().cast<WordModel>();
-    final FlutterTts tts = FlutterTts();
 
     var status = await Permission.storage.status;
     if (!status.isGranted) {

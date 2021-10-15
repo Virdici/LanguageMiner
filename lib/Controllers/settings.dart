@@ -52,6 +52,18 @@ class Settings {
     return position;
   }
 
+  Future setTtsSpeed(double speed) async {
+    _sp.setDouble('ttsSpeed', speed);
+  }
+
+  double getTtsSpeed() {
+    double? speed = _sp.getDouble('ttsSpeed');
+    if (speed == null) {
+      speed = 0;
+    }
+    return speed;
+  }
+
   Future setFontFamily(String name) async {
     _sp.setString('FontFamily', name);
   }
