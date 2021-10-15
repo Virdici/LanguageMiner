@@ -6,6 +6,7 @@ import 'package:language_miner/Controllers/dictController.dart';
 import 'package:language_miner/Controllers/settings.dart';
 import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/wordModel.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../model/textModel.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -34,13 +35,19 @@ class _ReadTextState extends State<ReadText> {
   ScrollController scrollController = new ScrollController();
   double fontSize = 12;
   double paddingSize = 0;
-  double scrollPosition = 0;
+  int scrollPositionIndexed = 0;
   late Settings settings;
   double appBarSize = 50;
   bool isTTsEnabled = true;
   final FlutterTts tts = FlutterTts();
   bool isMenuShown = false;
   String fontName = 'Dayrom';
+
+  List<String>? bookmarks = new List.empty(growable: true);
+
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
@@ -65,29 +72,26 @@ class _ReadTextState extends State<ReadText> {
       setState(() {
         fontSize = settings.getfontSize();
         paddingSize = settings.getPadding();
-        scrollPosition = settings.getScrollPosition();
+        scrollPositionIndexed = settings.getScrollPositionIndexed();
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
+        bookmarks = settings.getBookmarks();
       });
     });
-    Future.delayed(Duration(microseconds: 1), () => setPosition(context));
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
+    Future.delayed(Duration(microseconds: 100), () => setPosition(context));
   }
 
   void setPosition(BuildContext context) {
-    scrollController.animateTo(scrollPosition,
-        duration: new Duration(microseconds: 0), curve: Curves.bounceIn);
+    itemScrollController.jumpTo(index: scrollPositionIndexed);
   }
 
   @override
   Widget build(BuildContext context) {
-    scrollController = ScrollController() //get scroll position
-      ..addListener(() {
-        scrollPosition = scrollController.offset;
-      });
-    Timer.periodic(Duration(seconds: 2), (timer) {
-      settings.setScrollPosition(scrollPosition);
+    Timer.periodic(Duration(seconds: 1), (timer) {
+      settings.setScrollPositionIndexed(
+          itemPositionsListener.itemPositions.value.first.index);
     });
     return Scaffold(
       appBar: PreferredSize(
@@ -109,165 +113,222 @@ class _ReadTextState extends State<ReadText> {
             },
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: paddingSize),
-              child: ListView.builder(
-                  controller: scrollController,
+              child: ScrollablePositionedList.builder(
                   itemCount: paragraphsList.length,
+                  itemScrollController: itemScrollController,
+                  itemPositionsListener: itemPositionsListener,
+                  addAutomaticKeepAlives: true,
                   itemBuilder: (context, index) {
                     return textSpan(paragraphsList[index]);
                   }),
             ),
           ),
-          customAppBar(),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print(itemPositionsListener.itemPositions.value.first.index);
+          itemScrollController.jumpTo(index: 150);
+        },
       ),
     );
   }
 
-  Widget customAppBar() {
-    if (isMenuShown) {
-      return Container(
-        height: 280,
-        width: 220,
+  AppBar appBar() {
+    return AppBar(title: Text(titleController.text), actions: [
+      PopupMenuButton(
+        icon: Icon(Icons.bookmark),
         color: Colors.grey[900],
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
-              child: GestureDetector(
-                onTap: () {},
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Text size: ' + fontSize.round().toString(),
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Bookmarks',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            bookmarks!.add(itemPositionsListener
+                                .itemPositions.value.first.index
+                                .toString());
+                            innerSetState(() {
+                              setState(() {
+                                settings.saveBookmarks(bookmarks!);
+                              });
+                            });
+                          },
+                          icon: Icon(Icons.add))
+                    ],
+                  ),
+                  Container(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          for (var bookmark in bookmarks!)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  child: Text(
+                                    "sentence: $bookmark",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  onTap: () {
+                                    itemScrollController.jumpTo(
+                                        index: int.parse(bookmark));
+                                  },
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    innerSetState(() {
+                                      setState(() {
+                                        bookmarks!.remove(bookmark);
+                                      });
+                                    });
+                                  },
+                                  icon: Icon(Icons.delete),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
                     ),
-                    Slider(
-                      max: 32,
-                      min: 8,
-                      value: fontSize,
-                      onChanged: (value) {
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      PopupMenuButton(
+        color: Colors.grey[900],
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                children: [
+                  Text(
+                    'Text size: ${fontSize.round()}',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Slider(
+                    max: 44,
+                    min: 12,
+                    divisions: 8,
+                    value: fontSize,
+                    onChanged: (value) {
+                      innerSetState(() {
                         setState(() {
                           fontSize = value;
                           settings.setfontSize(value);
                         });
-                      },
-                    )
-                  ],
-                ),
+                      });
+                    },
+                  )
+                ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 0),
-              child: GestureDetector(
-                onTap: () {},
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Padding size: ' + paddingSize.round().toString(),
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    Slider(
-                      max: 32,
-                      min: 0,
-                      value: paddingSize,
-                      onChanged: (value) {
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                children: [
+                  Text(
+                    'Padding size: ${paddingSize.round()}',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Slider(
+                    max: 64,
+                    min: 0,
+                    divisions: 8,
+                    value: paddingSize,
+                    onChanged: (value) {
+                      innerSetState(() {
                         setState(() {
                           paddingSize = value;
                           settings.setPadding(value);
                         });
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'TTS',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  Switch(
-                      value: isTTsEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          isTTsEnabled = value;
-                          settings.setTts(isTTsEnabled);
-                        });
-                      })
+                      });
+                    },
+                  )
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: GestureDetector(
-                onTap: () {},
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Font',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    DropdownButton(
-                      value: fontName,
-                      focusColor: Colors.white,
-                      dropdownColor: Colors.grey[700],
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          fontName = newValue!;
-                          settings.setFontFamily(fontName);
-                        });
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Font',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  DropdownButton(
+                    value: fontName,
+                    focusColor: Colors.white,
+                    dropdownColor: Colors.grey[700],
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        fontName = newValue!;
+                        settings.setFontFamily(fontName);
+                      });
+                    },
+                    items: <String>['Dayrom', 'LouisGeorgeCafe', 'OpenDyslexic']
+                        .map<DropdownMenuItem<String>>(
+                      (String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: TextStyle(
+                                color: Colors.white, fontFamily: value),
+                          ),
+                        );
                       },
-                      items: <String>[
-                        'Dayrom',
-                        'LouisGeorgeCafe',
-                        'OpenDyslexic'
-                      ].map<DropdownMenuItem<String>>(
-                        (String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: value),
-                            ),
-                          );
-                        },
-                      ).toList(),
-                    ),
-                  ],
-                ),
+                    ).toList(),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      );
-    } else {
-      return Container();
-    }
+          ),
+        ],
+      )
+    ]);
   }
 
-  AppBar appBar() {
-    return AppBar(
-      title: Text(titleController.text),
-      actions: [
-        Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: () {
+  Widget bookark(String sentence) {
+    return StatefulBuilder(
+      builder: (context, innerSetState) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            child: Text(
+              "sentence: $sentence",
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              itemScrollController.jumpTo(index: int.parse(sentence));
+            },
+          ),
+          IconButton(
+            onPressed: () {
+              innerSetState(() {
                 setState(() {
-                  isMenuShown = !isMenuShown;
+                  bookmarks!.remove(sentence);
                 });
-              },
-              child: Icon(Icons.more_vert),
-            )),
-      ],
+              });
+            },
+            icon: Icon(Icons.delete),
+          ),
+        ],
+      ),
     );
   }
 
@@ -373,7 +434,8 @@ class _ReadTextState extends State<ReadText> {
   @override
   void dispose() {
     super.dispose();
-    settings.setScrollPosition(scrollPosition);
+    settings.setScrollPositionIndexed(
+        itemPositionsListener.itemPositions.value.first.index);
   }
 
   void showToast(String message) => Fluttertoast.showToast(msg: message);

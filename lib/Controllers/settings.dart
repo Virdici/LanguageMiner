@@ -75,4 +75,28 @@ class Settings {
     }
     return position;
   }
+
+  Future setScrollPositionIndexed(int position) async {
+    _sp.setInt('scrollPositionIndexed', position);
+  }
+
+  int getScrollPositionIndexed() {
+    int? position = _sp.getInt('scrollPositionIndexed');
+    if (position == null) {
+      position = 0;
+    }
+    return position;
+  }
+
+  Future saveBookmarks(List<String> bookmarks) async {
+    _sp.setStringList("bookmarks", bookmarks);
+  }
+
+  List<String> getBookmarks() {
+    List<String>? bookmarks = _sp.getStringList("bookmarks");
+    if (bookmarks == null) {
+      return bookmarks = new List.empty(growable: true);
+    }
+    return bookmarks;
+  }
 }
