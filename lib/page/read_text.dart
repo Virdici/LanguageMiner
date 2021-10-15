@@ -6,6 +6,7 @@ import 'package:language_miner/Controllers/dictController.dart';
 import 'package:language_miner/Controllers/settings.dart';
 import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/wordModel.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../model/textModel.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -35,12 +36,17 @@ class _ReadTextState extends State<ReadText> {
   double fontSize = 12;
   double paddingSize = 0;
   double scrollPosition = 0;
+  int scrollPositionIndexed = 0;
   late Settings settings;
   double appBarSize = 50;
   bool isTTsEnabled = true;
   final FlutterTts tts = FlutterTts();
   bool isMenuShown = false;
   String fontName = 'Dayrom';
+
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
@@ -65,7 +71,8 @@ class _ReadTextState extends State<ReadText> {
       setState(() {
         fontSize = settings.getfontSize();
         paddingSize = settings.getPadding();
-        scrollPosition = settings.getScrollPosition();
+        // scrollPosition = settings.getScrollPosition();
+        scrollPositionIndexed = settings.getScrollPositionIndexed();
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
       });
@@ -76,20 +83,23 @@ class _ReadTextState extends State<ReadText> {
   }
 
   void setPosition(BuildContext context) {
-    scrollController.animateTo(scrollPosition,
-        duration: Duration(microseconds: 1), curve: Curves.bounceIn);
+    // scrollController.animateTo(scrollPosition,
+    //     duration: Duration(milliseconds: 1), curve: Curves.easeIn);
+    itemScrollController.jumpTo(index: scrollPositionIndexed);
   }
 
   @override
   Widget build(BuildContext context) {
-    scrollController = ScrollController() //get scroll position
-      ..addListener(() {
-        scrollPosition = scrollController.offset;
-      });
-    Timer.periodic(Duration(milliseconds: 50), (timer) {
-      settings.setScrollPosition(scrollPosition);
+    // scrollController = ScrollController() //get scroll position
+    //   ..addListener(() {
+    //     scrollPosition = scrollController.offset;
+    //     print(scrollController.position.maxScrollExtent);
+    //   });
+    Timer.periodic(Duration(milliseconds: 5), (timer) {
+      // settings.setScrollPosition(scrollPosition);
+      settings.setScrollPositionIndexed(
+          itemPositionsListener.itemPositions.value.first.index);
     });
-
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
@@ -110,16 +120,22 @@ class _ReadTextState extends State<ReadText> {
             },
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: paddingSize),
-              child: ListView.builder(
-                  controller: scrollController,
-                  addAutomaticKeepAlives: false,
-                  cacheExtent: 100,
+              child: ScrollablePositionedList.builder(
+                  itemScrollController: itemScrollController,
+                  itemPositionsListener: itemPositionsListener,
+                  itemCount: paragraphsList.length,
                   itemBuilder: (context, index) {
                     return textSpan(paragraphsList[index]);
                   }),
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print(itemPositionsListener.itemPositions.value.first.index);
+          itemScrollController.jumpTo(index: 150);
+        },
       ),
     );
   }
@@ -182,44 +198,81 @@ class _ReadTextState extends State<ReadText> {
             ),
           ),
           PopupMenuItem(
-              child: StatefulBuilder(
-            builder: (context, innerSetState) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Font',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-                DropdownButton(
-                  value: fontName,
-                  focusColor: Colors.white,
-                  dropdownColor: Colors.grey[700],
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      fontName = newValue!;
-                      settings.setFontFamily(fontName);
-                    });
-                  },
-                  items: <String>['Dayrom', 'LouisGeorgeCafe', 'OpenDyslexic']
-                      .map<DropdownMenuItem<String>>(
-                    (String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(
-                          value,
-                          style:
-                              TextStyle(color: Colors.white, fontFamily: value),
-                        ),
-                      );
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Font',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  DropdownButton(
+                    value: fontName,
+                    focusColor: Colors.white,
+                    dropdownColor: Colors.grey[700],
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        fontName = newValue!;
+                        settings.setFontFamily(fontName);
+                      });
                     },
-                  ).toList(),
-                ),
-              ],
+                    items: <String>['Dayrom', 'LouisGeorgeCafe', 'OpenDyslexic']
+                        .map<DropdownMenuItem<String>>(
+                      (String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: TextStyle(
+                                color: Colors.white, fontFamily: value),
+                          ),
+                        );
+                      },
+                    ).toList(),
+                  ),
+                ],
+              ),
             ),
-          ))
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Bookmarks',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Container(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [bookark('2263')],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       )
     ]);
+  }
+
+  Widget bookark(String sentence) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "sentence: $sentence",
+          style: TextStyle(color: Colors.white),
+        ),
+        IconButton(
+          onPressed: () {},
+          icon: Icon(Icons.delete),
+        ),
+      ],
+    );
   }
 
   Widget textSpan(String text) {
@@ -323,8 +376,12 @@ class _ReadTextState extends State<ReadText> {
 
   @override
   void dispose() {
+    // settings.setScrollPosition(scrollPosition);
+    // settings.setScrollPositionIndexed(
+    //     itemPositionsListener.itemPositions.value.first.index);
     super.dispose();
-    settings.setScrollPosition(scrollPosition);
+    settings.setScrollPositionIndexed(
+        itemPositionsListener.itemPositions.value.first.index);
   }
 
   void showToast(String message) => Fluttertoast.showToast(msg: message);

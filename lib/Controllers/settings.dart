@@ -4,6 +4,7 @@ import 'dart:async';
 class Settings {
   static late SharedPreferences _sp;
   static Settings? _instance;
+  List<String> bookmarks = new List.empty(growable: true);
 
   Settings._internal();
   factory Settings() {
@@ -74,5 +75,25 @@ class Settings {
       position = true;
     }
     return position;
+  }
+
+  Future setScrollPositionIndexed(int position) async {
+    _sp.setInt('scrollPositionIndexed', position);
+  }
+
+  int getScrollPositionIndexed() {
+    int? position = _sp.getInt('scrollPositionIndexed');
+    if (position == null) {
+      position = 0;
+    }
+    return position;
+  }
+
+  Future<bool> saveBookmark() async {
+    return await _sp.setStringList("bookmarks", bookmarks);
+  }
+
+  List<String>? getBookmarks() {
+    return _sp.getStringList("bookmarks");
   }
 }
