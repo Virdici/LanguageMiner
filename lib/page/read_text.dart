@@ -303,6 +303,32 @@ class _ReadTextState extends State<ReadText> {
           ),
           PopupMenuItem(
             child: StatefulBuilder(
+              builder: (context, innerSetState) => Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'TTS',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    Switch(
+                        value: isTTsEnabled,
+                        onChanged: (value) {
+                          innerSetState(() {
+                            setState(() {
+                              isTTsEnabled = value;
+                              settings.setTts(isTTsEnabled);
+                            });
+                          });
+                        })
+                  ],
+                ),
+              ),
+            ),
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
               builder: (context, innerSetState) => Column(
                 children: [
                   Text(
