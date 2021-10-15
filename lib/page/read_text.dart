@@ -70,14 +70,14 @@ class _ReadTextState extends State<ReadText> {
         isTTsEnabled = settings.getTts();
       });
     });
-    Future.delayed(Duration.zero, () => setPosition(context));
+    Future.delayed(Duration(microseconds: 1), () => setPosition(context));
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
   }
 
   void setPosition(BuildContext context) {
     scrollController.animateTo(scrollPosition,
-        duration: new Duration(microseconds: 1), curve: Curves.bounceIn);
+        duration: new Duration(microseconds: 0), curve: Curves.bounceIn);
   }
 
   @override
@@ -86,6 +86,9 @@ class _ReadTextState extends State<ReadText> {
       ..addListener(() {
         scrollPosition = scrollController.offset;
       });
+    Timer.periodic(Duration(seconds: 2), (timer) {
+      settings.setScrollPosition(scrollPosition);
+    });
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
