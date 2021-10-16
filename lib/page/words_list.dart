@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -20,6 +21,8 @@ class _WordsPageState extends State<WordsPage> {
   late Box box;
   double ttsSpeed = 1;
   final FlutterTts tts = FlutterTts();
+  var _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
   Future initBox() async {
     box = await Hive.openBox<WordModel>('words');
   }
@@ -313,7 +316,6 @@ class _WordsPageState extends State<WordsPage> {
 
   void exportTsv(bool withTTS) async {
     var words = box.values.toList().cast<WordModel>();
-
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       await Permission.storage.request();
@@ -324,7 +326,7 @@ class _WordsPageState extends State<WordsPage> {
       for (var word in words) {
         if (withTTS)
           tts.synthesizeToFile(word.sentence,
-              "${word.word + word.sentence.split(' ').first}.mp3");
+              "${word.word + word.sentence.split(' ').first + getRandomString(20)}.mp3");
         await file.writeAsString(
           '${word.word}\t${word.sentence}\t${word.translation}\t${word.audioReference}\n',
           mode: FileMode.append,
@@ -333,6 +335,9 @@ class _WordsPageState extends State<WordsPage> {
       showToast('Saved to:\n\n ${directory.path}/export.tsv');
     }
   }
+
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
   void showToast(String message) => Fluttertoast.showToast(msg: message);
 }
