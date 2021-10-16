@@ -41,7 +41,6 @@ class _AddWordDialogState extends State<AddWordDialog> {
   Widget build(BuildContext context) {
     final isEditing = widget.word != null;
     final title = isEditing ? 'Edit word' : 'Add word';
-    print(isEditing);
     return AlertDialog(
       title: Text(title),
       content: Form(

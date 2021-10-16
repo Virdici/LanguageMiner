@@ -22,4 +22,15 @@ class TextController {
     final box = Hive.box<TextModel>('texts');
     box.add(text);
   }
+
+  static bool checkIfExists(String title) {
+    var box = Hive.box<TextModel>('texts');
+    var terms = box.values.where((element) => element.title == title);
+
+    if (terms.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

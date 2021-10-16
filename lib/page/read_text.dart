@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:language_miner/Controllers/bookmarkController.dart';
 import 'package:language_miner/Controllers/dictController.dart';
 import 'package:language_miner/Controllers/settings.dart';
 import 'package:language_miner/Controllers/wordController.dart';
+import 'package:language_miner/model/bookmarkModel.dart';
 import 'package:language_miner/model/wordModel.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../model/textModel.dart';
@@ -28,7 +31,8 @@ class _ReadTextState extends State<ReadText> {
   final contentsController = TextEditingController();
   late String content;
   late int paragraphId = -1;
-  late Box box;
+  late Box wordsBox;
+  late Box bookmarksBox;
   late List<Map<dynamic, dynamic>> dictTerms;
   late String selectedWord;
   late String selectedSentence;
@@ -44,7 +48,8 @@ class _ReadTextState extends State<ReadText> {
   String fontName = 'Dayrom';
   double ttsSpeed = 0;
 
-  List<String>? bookmarks = new List.empty(growable: true);
+  // List<String>? bookmarks = new List.empty(growable: true);
+  late List<BookmarkModel> bookmarks;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -53,14 +58,19 @@ class _ReadTextState extends State<ReadText> {
   late List<String> paragraphsList = content.split(
       new RegExp(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|[A-Z].*)|\n"));
 
-  Future initBox() async {
-    box = await Hive.openBox<WordModel>('words');
+  Future initwordsBox() async {
+    wordsBox = await Hive.openBox<WordModel>('words');
+    bookmarksBox = await Hive.openBox<BookmarkModel>('bookmarks');
+    bookmarks = bookmarksBox.values
+        .cast<BookmarkModel>()
+        .where((element) => element.textTitle == widget.text!.title)
+        .toList();
   }
 
   @override
   void initState() {
     super.initState();
-    initBox();
+    initwordsBox();
     if (widget.text != null) {
       final text = widget.text!;
 
@@ -76,26 +86,16 @@ class _ReadTextState extends State<ReadText> {
         scrollPositionIndexed = settings.getScrollPositionIndexed();
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
-        ttsSpeed = 1;
-        // ttsSpeed = settings.getTtsSpeed();
+        ttsSpeed = 0.8;
         bookmarks = settings.getBookmarks();
       });
     });
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
-    Future.delayed(Duration(microseconds: 100), () => setPosition(context));
-  }
-
-  void setPosition(BuildContext context) {
-    itemScrollController.jumpTo(index: scrollPositionIndexed);
   }
 
   @override
   Widget build(BuildContext context) {
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      settings.setScrollPositionIndexed(
-          itemPositionsListener.itemPositions.value.first.index);
-    });
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
@@ -129,9 +129,17 @@ class _ReadTextState extends State<ReadText> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print(itemPositionsListener.itemPositions.value.first.index);
-          itemScrollController.jumpTo(index: 150);
+        onPressed: () async {
+          print(bookmarksBox.values
+              .toList()
+              .cast<BookmarkModel>()
+              .first
+              .textTitle);
+          print(bookmarksBox.values
+              .toList()
+              .cast<BookmarkModel>()
+              .first
+              .sentenceIndex);
         },
       ),
     );
@@ -157,12 +165,16 @@ class _ReadTextState extends State<ReadText> {
                       ),
                       IconButton(
                           onPressed: () {
-                            bookmarks!.add(itemPositionsListener
-                                .itemPositions.value.first.index
-                                .toString());
                             innerSetState(() {
                               setState(() {
-                                settings.saveBookmarks(bookmarks!);
+                                BookmarkController.addBookmark(
+                                    widget.text!.title,
+                                    itemPositionsListener
+                                        .itemPositions.value.first.index);
+                                bookmarks.add(BookmarkModel()
+                                  ..textTitle = widget.text!.title
+                                  ..sentenceIndex = itemPositionsListener
+                                      .itemPositions.value.first.index);
                               });
                             });
                           },
@@ -171,37 +183,38 @@ class _ReadTextState extends State<ReadText> {
                   ),
                   Container(
                     child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          for (var bookmark in bookmarks!)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                GestureDetector(
-                                  child: Text(
-                                    "sentence: $bookmark",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  onTap: () {
-                                    itemScrollController.jumpTo(
-                                        index: int.parse(bookmark));
-                                  },
+                        child: Column(
+                      children: [
+                        for (var bookmark in bookmarks.reversed)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                child: Text(
+                                  "sentence: ${bookmark.sentenceIndex}",
+                                  style: TextStyle(color: Colors.white),
                                 ),
-                                IconButton(
-                                  onPressed: () {
-                                    innerSetState(() {
-                                      setState(() {
-                                        bookmarks!.remove(bookmark);
-                                      });
+                                onTap: () {
+                                  itemScrollController.jumpTo(
+                                      index: bookmark.sentenceIndex);
+                                },
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  innerSetState(() {
+                                    setState(() {
+                                      bookmarks.remove(bookmark);
+                                      BookmarkController.deleteBookmark(
+                                          bookmark);
                                     });
-                                  },
-                                  icon: Icon(Icons.delete),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
+                                  });
+                                },
+                                icon: Icon(Icons.delete),
+                              ),
+                            ],
+                          ),
+                      ],
+                    )),
                   ),
                 ],
               ),
@@ -377,7 +390,7 @@ class _ReadTextState extends State<ReadText> {
             onPressed: () {
               innerSetState(() {
                 setState(() {
-                  bookmarks!.remove(sentence);
+                  // bookmarks!.remove(sentence);
                 });
               });
             },
@@ -490,8 +503,6 @@ class _ReadTextState extends State<ReadText> {
   @override
   void dispose() {
     super.dispose();
-    settings.setScrollPositionIndexed(
-        itemPositionsListener.itemPositions.value.first.index);
   }
 
   void showToast(String message) => Fluttertoast.showToast(msg: message);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:language_miner/Controllers/textController.dart';
 
 import '../model/textModel.dart';
 
@@ -45,7 +46,6 @@ class _TextDialogState extends State<AddTextDialog> {
   Widget build(BuildContext context) {
     final isEditing = widget.text != null;
     final title = isEditing ? 'Edit text' : 'Add text';
-    print(isEditing);
 
     return returnDialog(title, context, isEditing);
   }
@@ -86,8 +86,11 @@ class _TextDialogState extends State<AddTextDialog> {
             border: OutlineInputBorder(),
             hintText: 'Enter Title',
           ),
-          validator: (name) =>
-              name != null && name.isEmpty ? 'Enter a title' : null,
+          validator: (name) => name != null && name.isEmpty
+              ? 'Enter a title'
+              : TextController.checkIfExists(name!)
+                  ? 'Title already exists'
+                  : null,
         ),
       );
 

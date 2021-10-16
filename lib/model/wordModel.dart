@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part './wordModel.g.dart';
+part 'wordModel.g.dart';
 
 @HiveType(typeId: 1)
 class WordModel extends HiveObject {
