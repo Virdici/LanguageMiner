@@ -48,7 +48,6 @@ class _ReadTextState extends State<ReadText> {
   String fontName = 'Dayrom';
   double ttsSpeed = 0;
 
-  // List<String>? bookmarks = new List.empty(growable: true);
   late List<BookmarkModel> bookmarks;
 
   final ItemScrollController itemScrollController = ItemScrollController();
@@ -87,7 +86,6 @@ class _ReadTextState extends State<ReadText> {
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
         ttsSpeed = 0.8;
-        bookmarks = settings.getBookmarks();
       });
     });
     tts.setLanguage('de');
@@ -127,20 +125,6 @@ class _ReadTextState extends State<ReadText> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          print(bookmarksBox.values
-              .toList()
-              .cast<BookmarkModel>()
-              .first
-              .textTitle);
-          print(bookmarksBox.values
-              .toList()
-              .cast<BookmarkModel>()
-              .first
-              .sentenceIndex);
-        },
       ),
     );
   }
