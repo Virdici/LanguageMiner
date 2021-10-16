@@ -89,19 +89,10 @@ class _ReadTextState extends State<ReadText> {
     });
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
-    Future.delayed(Duration(microseconds: 100), () => setPosition(context));
-  }
-
-  void setPosition(BuildContext context) {
-    itemScrollController.jumpTo(index: scrollPositionIndexed);
   }
 
   @override
   Widget build(BuildContext context) {
-    Timer.periodic(Duration(seconds: 1), (timer) {
-      settings.setScrollPositionIndexed(
-          itemPositionsListener.itemPositions.value.first.index);
-    });
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
@@ -456,8 +447,6 @@ class _ReadTextState extends State<ReadText> {
   @override
   void dispose() {
     super.dispose();
-    settings.setScrollPositionIndexed(
-        itemPositionsListener.itemPositions.value.first.index);
   }
 
   void showToast(String message) => Fluttertoast.showToast(msg: message);
