@@ -46,6 +46,7 @@ class _ReadTextState extends State<ReadText> {
   final FlutterTts tts = FlutterTts();
   bool isMenuShown = false;
   String fontName = 'Dayrom';
+  double ttsSpeed = 0;
 
   // List<String>? bookmarks = new List.empty(growable: true);
   late List<BookmarkModel> bookmarks;
@@ -85,6 +86,8 @@ class _ReadTextState extends State<ReadText> {
         scrollPositionIndexed = settings.getScrollPositionIndexed();
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
+        ttsSpeed = 0.8;
+        bookmarks = settings.getBookmarks();
       });
     });
     tts.setLanguage('de');
@@ -146,7 +149,7 @@ class _ReadTextState extends State<ReadText> {
     return AppBar(title: Text(titleController.text), actions: [
       PopupMenuButton(
         icon: Icon(Icons.bookmark),
-        color: Colors.grey[900],
+        color: Colors.grey[850],
         itemBuilder: (context) => [
           PopupMenuItem(
             child: StatefulBuilder(
@@ -220,7 +223,7 @@ class _ReadTextState extends State<ReadText> {
         ],
       ),
       PopupMenuButton(
-        color: Colors.grey[900],
+        color: Colors.grey[850],
         itemBuilder: (context) => [
           PopupMenuItem(
             child: StatefulBuilder(
@@ -307,6 +310,59 @@ class _ReadTextState extends State<ReadText> {
                       },
                     ).toList(),
                   ),
+                ],
+              ),
+            ),
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'TTS',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    Switch(
+                        value: isTTsEnabled,
+                        onChanged: (value) {
+                          innerSetState(() {
+                            setState(() {
+                              isTTsEnabled = value;
+                              settings.setTts(isTTsEnabled);
+                            });
+                          });
+                        })
+                  ],
+                ),
+              ),
+            ),
+          ),
+          PopupMenuItem(
+            child: StatefulBuilder(
+              builder: (context, innerSetState) => Column(
+                children: [
+                  Text(
+                    'Tts speed: $ttsSpeed',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Slider(
+                    max: 1.5,
+                    min: 0.5,
+                    divisions: 10,
+                    value: ttsSpeed,
+                    onChanged: (value) {
+                      innerSetState(() {
+                        setState(() {
+                          ttsSpeed = value;
+                          tts.setSpeechRate(ttsSpeed);
+                          settings.setTtsSpeed(value);
+                        });
+                      });
+                    },
+                  )
                 ],
               ),
             ),
