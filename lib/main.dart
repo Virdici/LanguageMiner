@@ -5,13 +5,15 @@ import 'package:language_miner/model/wordModel.dart';
 import 'package:language_miner/page/texts_list.dart';
 import 'package:language_miner/page/words_list.dart';
 import 'package:language_miner/model/textModel.dart';
+import 'package:language_miner/model/bookmarkModel.dart';
 
 void main() async {
   await Hive.initFlutter();
 
   Hive
     ..registerAdapter(TextModelAdapter())
-    ..registerAdapter(WordModelAdapter());
+    ..registerAdapter(WordModelAdapter())
+    ..registerAdapter(BookmarkModelAdapter());
 
   runApp(MaterialApp(
     theme: ThemeData(
