@@ -99,31 +99,6 @@ class _ReadTextState extends State<ReadText> {
     tts.setSpeechRate(0.8);
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return SelectableText(
-  //     content,
-  //     style: TextStyle(
-  //         color: Colors.white,
-  //         fontSize: fontSize,
-  //         fontWeight: FontWeight.bold,
-  //         fontFamily: fontName),
-  //     autofocus: true,
-  //     dragStartBehavior: DragStartBehavior.down,
-  //     selectionControls: FlutterSelectionControls(
-  //       toolBarItems: <ToolBarItem>[
-  //         ToolBarItem(
-  //           item: Text(
-  //             'xD',
-  //           ),
-  //           onItemPressed: (String highLightedText, int start, int end) =>
-  //               {print(highLightedText)},
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,20 +119,6 @@ class _ReadTextState extends State<ReadText> {
         selectionControls: FlutterSelectionControls(
           toolBarItems: toolBarItems(),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          var headers = {
-            'accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          };
-          var response = await http.get(
-              Uri.parse(
-                  'https://libretranslate.com/translate/q=i%20habe%20Durst&source=de&target=en&format=text&api_key=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-              headers: headers);
-          print(json.decode(response.body));
-          // print(response.body);
-        },
       ),
     );
   }
@@ -195,43 +156,6 @@ class _ReadTextState extends State<ReadText> {
       ),
     ];
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: PreferredSize(
-  //       child: appBar(),
-  //       preferredSize: Size.fromHeight(appBarSize),
-  //     ),
-  //     body: Stack(
-  //       alignment: Alignment.topRight,
-  //       children: [
-  //         GestureDetector(
-  //           onDoubleTap: () {
-  //             setState(() {
-  //               if (appBarSize == 50) {
-  //                 appBarSize = 0;
-  //               } else {
-  //                 appBarSize = 50;
-  //               }
-  //             });
-  //           },
-  //           child: Padding(
-  //             padding: EdgeInsets.symmetric(horizontal: paddingSize),
-  //             child: ScrollablePositionedList.builder(
-  //                 itemCount: paragraphsList.length,
-  //                 itemScrollController: itemScrollController,
-  //                 itemPositionsListener: itemPositionsListener,
-  //                 addAutomaticKeepAlives: true,
-  //                 itemBuilder: (context, index) {
-  //                   return textSpan(paragraphsList[index]);
-  //                 }),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   AppBar appBar() {
     return AppBar(
@@ -493,38 +417,6 @@ class _ReadTextState extends State<ReadText> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget textSpan(String text) {
-    List<String> words = text.split(new RegExp(
-        r"(?<=[^a-zA-Z0-9äöüÄÖÜß])(?=[a-zA-Z0-9äöüÄÖÜß])|(?<=[a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß])|(?<=[^a-zA-Z0-9äöüÄÖÜß])(?=[^a-zA-Z0-9äöüÄÖÜß])"));
-    return Wrap(
-      alignment: WrapAlignment.start,
-      children: [
-        for (var i = 0; i < words.length; i++)
-          GestureDetector(
-            child: Text(
-              words[i],
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: fontName),
-            ),
-            onTap: () async => {
-              selectedSentence = text,
-              selectedWord = words[i],
-              dictTerms = await DictController.getTerm(words[i]),
-              WordController.checkIfExists(words[i], selectedSentence)
-                  ? showToast('Term already saved')
-                  : modalDefinitions(dictTerms, words[i]),
-            },
-            onLongPress: () {
-              if (isTTsEnabled) tts.speak(text);
-            },
-          )
-      ],
     );
   }
 
