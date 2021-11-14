@@ -2,8 +2,8 @@ import 'package:hive/hive.dart';
 import 'package:language_miner/model/bookmarkModel.dart';
 
 class BookmarkController {
-  static void deleteBookmark(BookmarkModel text) {
-    text.delete();
+  static void deleteBookmark(BookmarkModel bookmark) {
+    bookmark.delete();
   }
 
   static Future addBookmark(String title, int sentenceIndex) async {
