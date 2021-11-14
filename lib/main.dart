@@ -15,31 +15,33 @@ void main() async {
     ..registerAdapter(WordModelAdapter())
     ..registerAdapter(BookmarkModelAdapter());
 
-  runApp(MaterialApp(
-    theme: ThemeData(
-        primaryColor: Colors.grey[900],
-        backgroundColor: Colors.black,
-        scaffoldBackgroundColor: Colors.black,
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            selectedItemColor: Colors.green[400],
-            backgroundColor: Colors.grey[900],
-            unselectedItemColor: Colors.grey[700]),
-        textTheme: TextTheme(
-          headline1: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'OpenDyslexic'),
-          headline2: TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'OpenDyslexic'),
-        )),
-    routes: {
-      '/': (BuildContext context) => MyApp(),
-    },
-  ));
+  runApp(
+    MaterialApp(
+      theme: ThemeData(
+          primaryColor: Colors.grey[900],
+          backgroundColor: Colors.black,
+          scaffoldBackgroundColor: Colors.black,
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+              selectedItemColor: Colors.green[400],
+              backgroundColor: Colors.grey[900],
+              unselectedItemColor: Colors.grey[700]),
+          textTheme: TextTheme(
+            headline1: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'OpenDyslexic'),
+            headline2: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'OpenDyslexic'),
+          )),
+      routes: {
+        '/': (BuildContext context) => MyApp(),
+      },
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -50,16 +52,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int _pageIndex = 0;
   List<Widget> pages = [TextPg(), WordPg()];
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   void changePage(int index) {
     setState(() {});

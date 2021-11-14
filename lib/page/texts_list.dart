@@ -87,10 +87,10 @@ class _TextsPageState extends State<TextsPage> {
     return Card(
       color: Colors.grey[700],
       child: ExpansionTile(
-        collapsedIconColor: Colors.white,
-        collapsedTextColor: Colors.white,
-        textColor: Colors.white,
-        iconColor: Colors.white,
+        // collapsedIconColor: Colors.white,
+        // collapsedTextColor: Colors.white,
+        // textColor: Colors.white,
+        // iconColor: Colors.white,
         tilePadding: EdgeInsets.symmetric(horizontal: 24),
         title: Text(
           text.title,
