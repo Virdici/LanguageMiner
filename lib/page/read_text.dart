@@ -97,12 +97,45 @@ class _ReadTextState extends State<ReadText> {
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
   }
+//RICH
+  // @override
+  // Widget build(BuildContext context) {
+  //   scrollController = ScrollController()
+  //     ..addListener(() {
+  //       print(scrollController.position.pixels);
+  //     });
+  //   return Scaffold(
+  //     appBar: PreferredSize(
+  //       child: appBar(),
+  //       preferredSize: Size.fromHeight(appBarSize),
+  //     ),
+  //     // linia 106 by naprawić jumpy przy zaznaczaniu poprzez przytrzymanie
+  //     body: SingleChildScrollView(
+  //       child: SelectableText.rich(
+  //         TextSpan(text: content),
+  //         style: TextStyle(
+  //             color: Colors.white,
+  //             fontSize: fontSize,
+  //             fontWeight: FontWeight.bold,
+  //             fontFamily: fontName),
+  //         dragStartBehavior: DragStartBehavior.down,
+  //         selectionControls: FlutterSelectionControls(
+  //           toolBarItems: toolBarItems(),
+  //         ),
+  //       ),
+  //       controller: scrollController,
+  //     ),
+  //     floatingActionButton: FloatingActionButton(
+  //       onPressed: () {},
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
     scrollController = ScrollController()
       ..addListener(() {
-        print(scrollController.position.pixels);
+        print(scrollController.offset);
       });
     return Scaffold(
       appBar: PreferredSize(
