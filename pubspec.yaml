@@ -33,6 +33,7 @@ dependencies:
   flutter_tts:
   scrollable_positioned_list:
   text_selection_controls:
+  extended_text:
   android_intent:
   http:
   # The following adds the Cupertino Icons font to your application.

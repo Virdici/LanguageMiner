@@ -36,167 +36,7 @@ class _WordsPageState extends State<WordsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(
-        title: Text('Words'),
-        actions: [
-          PopupMenuButton(
-              color: Colors.grey[850],
-              icon: Icon(Icons.menu),
-              itemBuilder: (context) => [
-                    PopupMenuItem(
-                      child: TextButton(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Export',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Icon(
-                                Icons.import_export,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                          onPressed: () async {
-                            exportTsv(false);
-                          }),
-                    ),
-                    PopupMenuItem(
-                      child: StatefulBuilder(
-                        builder: (context, innerSetState) => Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  ' Tts speed: $ttsSpeed',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 18,
-                                ),
-                                TextButton(
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        'test',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.play_arrow,
-                                        color: Colors.white,
-                                      )
-                                    ],
-                                  ),
-                                  onPressed: () {
-                                    tts.speak(
-                                        "Es wird die Geschwindigkeit eines Sprachsynthesizers");
-                                  },
-                                ),
-                              ],
-                            ),
-                            Slider(
-                              max: 1.5,
-                              min: 0.5,
-                              divisions: 10,
-                              value: ttsSpeed,
-                              onChanged: (value) {
-                                innerSetState(() {
-                                  setState(() {
-                                    ttsSpeed = value;
-                                    tts.setSpeechRate(ttsSpeed);
-                                  });
-                                });
-                              },
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Export with tts',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Icon(
-                                Icons.import_export,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                          onPressed: () async {
-                            exportTsv(true);
-                          }),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Delete words',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                          onPressed: () {
-                            box.clear();
-                          }),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                'Delete storage',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Icon(
-                                Icons.delete_forever_outlined,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                          onPressed: () async {
-                            List files = new List.empty(growable: true);
-                            final Directory? directory =
-                                await getExternalStorageDirectory();
-                            files = Directory("${directory!.path}/").listSync();
-                            for (File file in files)
-                              file.delete(recursive: true);
-                          }),
-                    ),
-                  ])
-        ],
-      ),
+      appBar: appBar(),
       body: ValueListenableBuilder<Box<WordModel>>(
         valueListenable: Hive.box<WordModel>('words').listenable(),
         builder: (context, box, _) {
@@ -224,14 +64,177 @@ class _WordsPageState extends State<WordsPage> {
     );
   }
 
+  AppBar appBar() {
+    return new AppBar(
+      title: Text('Words'),
+      actions: [
+        PopupMenuButton(
+            color: Colors.grey[850],
+            icon: Icon(Icons.menu),
+            itemBuilder: (context) => [
+                  PopupMenuItem(
+                    child: TextButton(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              'Export',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                            Icon(
+                              Icons.import_export,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                        onPressed: () async {
+                          exportTsv(false);
+                        }),
+                  ),
+                  PopupMenuItem(
+                    child: StatefulBuilder(
+                      builder: (context, innerSetState) => Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                ' Tts speed: $ttsSpeed',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 18,
+                              ),
+                              TextButton(
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'test',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.play_arrow,
+                                      color: Colors.white,
+                                    )
+                                  ],
+                                ),
+                                onPressed: () {
+                                  tts.speak(
+                                      "Es wird die Geschwindigkeit eines Sprachsynthesizers");
+                                },
+                              ),
+                            ],
+                          ),
+                          Slider(
+                            max: 1.5,
+                            min: 0.5,
+                            divisions: 10,
+                            value: ttsSpeed,
+                            onChanged: (value) {
+                              innerSetState(() {
+                                setState(() {
+                                  ttsSpeed = value;
+                                  tts.setSpeechRate(ttsSpeed);
+                                });
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  PopupMenuItem(
+                    child: TextButton(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              'Export with tts',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                            Icon(
+                              Icons.import_export,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                        onPressed: () async {
+                          exportTsv(true);
+                        }),
+                  ),
+                  PopupMenuItem(
+                    child: TextButton(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              'Delete words',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                            Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                        onPressed: () {
+                          box.clear();
+                        }),
+                  ),
+                  PopupMenuItem(
+                    child: TextButton(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              'Delete storage',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                            Icon(
+                              Icons.delete_forever_outlined,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
+                        onPressed: () async {
+                          List files = new List.empty(growable: true);
+                          final Directory? directory =
+                              await getExternalStorageDirectory();
+                          files = Directory("${directory!.path}/").listSync();
+                          for (File file in files) file.delete(recursive: true);
+                        }),
+                  ),
+                ])
+      ],
+    );
+  }
+
   Widget wordCard(WordModel word, int i) {
     return Card(
         color: Colors.grey[700],
         child: ExpansionTile(
-          // collapsedIconColor: Colors.white,
-          // collapsedTextColor: Colors.white,
-          // textColor: Colors.white,
-          // iconColor: Colors.white,
+          collapsedIconColor: Colors.white,
+          collapsedTextColor: Colors.white,
+          textColor: Colors.white,
+          iconColor: Colors.white,
           tilePadding: EdgeInsets.symmetric(horizontal: 24),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
