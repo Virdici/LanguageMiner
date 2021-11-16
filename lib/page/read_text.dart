@@ -1,17 +1,14 @@
 import 'dart:ui';
 import 'dart:async';
+import 'package:extended_text/extended_text.dart';
 import 'package:hive/hive.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:android_intent/android_intent.dart';
 import 'package:language_miner/Controllers/bookmarkController.dart';
+import 'package:language_miner/TextUtils/custom_selection_controls.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:text_selection_controls/text_selection_controls.dart';
-import 'package:language_miner/Controllers/dictController.dart';
 import 'package:language_miner/Controllers/settings.dart';
-import 'package:language_miner/Controllers/wordController.dart';
 import 'package:language_miner/model/bookmarkModel.dart';
 import 'package:language_miner/model/wordModel.dart';
 import '../model/textModel.dart';
@@ -97,12 +94,45 @@ class _ReadTextState extends State<ReadText> {
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
   }
-//RICH
+
+  @override
+  Widget build(BuildContext context) {
+    scrollController = ScrollController()
+      ..addListener(() {
+        // print(scrollController.offset);
+      });
+    return Scaffold(
+      appBar: PreferredSize(
+        child: appBar(),
+        preferredSize: Size.fromHeight(appBarSize),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingSize),
+          child: ExtendedText(
+            content,
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                fontFamily: fontName),
+            selectionEnabled: true,
+            selectionControls: CustomTextSelectionControls(modal: false),
+          ),
+        ),
+        controller: scrollController,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+      ),
+    );
+  }
+
   // @override
   // Widget build(BuildContext context) {
   //   scrollController = ScrollController()
   //     ..addListener(() {
-  //       print(scrollController.position.pixels);
+  //       print(scrollController.offset);
   //     });
   //   return Scaffold(
   //     appBar: PreferredSize(
@@ -111,8 +141,8 @@ class _ReadTextState extends State<ReadText> {
   //     ),
   //     // linia 106 by naprawić jumpy przy zaznaczaniu poprzez przytrzymanie
   //     body: SingleChildScrollView(
-  //       child: SelectableText.rich(
-  //         TextSpan(text: content),
+  //       child: SelectableText(
+  //         content,
   //         style: TextStyle(
   //             color: Colors.white,
   //             fontSize: fontSize,
@@ -131,72 +161,39 @@ class _ReadTextState extends State<ReadText> {
   //   );
   // }
 
-  @override
-  Widget build(BuildContext context) {
-    scrollController = ScrollController()
-      ..addListener(() {
-        print(scrollController.offset);
-      });
-    return Scaffold(
-      appBar: PreferredSize(
-        child: appBar(),
-        preferredSize: Size.fromHeight(appBarSize),
-      ),
-      // linia 106 by naprawić jumpy przy zaznaczaniu poprzez przytrzymanie
-      body: SingleChildScrollView(
-        child: SelectableText(
-          content,
-          style: TextStyle(
-              color: Colors.white,
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              fontFamily: fontName),
-          dragStartBehavior: DragStartBehavior.down,
-          selectionControls: FlutterSelectionControls(
-            toolBarItems: toolBarItems(),
-          ),
-        ),
-        controller: scrollController,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-      ),
-    );
-  }
-
-  List<ToolBarItem> toolBarItems() {
-    return [
-      ToolBarItem(
-          item: Text(
-            'Copy',
-          ),
-          itemControl: ToolBarItemControl.copy),
-      ToolBarItem(
-        item: Text(
-          'word',
-        ),
-        onItemPressed: (String highLightedText, int start, int end) async => {
-          selectedWord = highLightedText,
-          dictTerms = await DictController.getTerm(highLightedText),
-          modalDefinitions(dictTerms, highLightedText),
-        },
-      ),
-      ToolBarItem(
-        item: Text(
-          'translate',
-        ),
-        onItemPressed: (String highLightedText, int start, int end) async {
-          final AndroidIntent intent = AndroidIntent(
-              action: 'android.intent.action.TRANSLATE',
-              arguments: {
-                'android.intent.extra.PROCESS_TEXT': highLightedText,
-              },
-              package: 'com.google.android.apps.translate');
-          intent.launch();
-        },
-      ),
-    ];
-  }
+  // List<ToolBarItem> toolBarItems() {
+  //   return [
+  //     ToolBarItem(
+  //         item: Text(
+  //           'Copy',
+  //         ),
+  //         itemControl: ToolBarItemControl.copy),
+  //     ToolBarItem(
+  //       item: Text(
+  //         'word',
+  //       ),
+  //       onItemPressed: (String highLightedText, int start, int end) async => {
+  //         selectedWord = highLightedText,
+  //         dictTerms = await DictController.getTerm(highLightedText),
+  //         modalDefinitions(dictTerms, highLightedText),
+  //       },
+  //     ),
+  //     ToolBarItem(
+  //       item: Text(
+  //         'translate',
+  //       ),
+  //       onItemPressed: (String highLightedText, int start, int end) async {
+  //         final AndroidIntent intent = AndroidIntent(
+  //             action: 'android.intent.action.TRANSLATE',
+  //             arguments: {
+  //               'android.intent.extra.PROCESS_TEXT': highLightedText,
+  //             },
+  //             package: 'com.google.android.apps.translate');
+  //         intent.launch();
+  //       },
+  //     ),
+  //   ];
+  // }
 
   AppBar appBar() {
     return AppBar(
@@ -267,6 +264,7 @@ class _ReadTextState extends State<ReadText> {
     );
   }
 
+  //TODO: different position on different font and padding settings
   Widget buildBookmarks(List<BookmarkModel> bookmarks) {
     if (bookmarks.isEmpty) {
       return Center(
@@ -314,81 +312,6 @@ class _ReadTextState extends State<ReadText> {
           icon: Icon(Icons.delete))
     ]);
   }
-
-  // PopupMenuItem bookmarksMenu() {
-  //   return PopupMenuItem(
-  //     child: StatefulBuilder(
-  //       builder: (context, innerSetState) => Column(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               Text(
-  //                 'Bookmarks',
-  //                 style: TextStyle(
-  //                   color: Colors.white,
-  //                   fontSize: 16,
-  //                 ),
-  //               ),
-  //               IconButton(
-  //                 onPressed: () {
-  //                   innerSetState(() {
-  //                     setState(() {
-  //                       BookmarkController.addBookmark(widget.text!.title,
-  //                           scrollController.position.pixels.toInt());
-  //                       bookmarks.add(BookmarkModel()
-  //                         ..textTitle = widget.text!.title
-  //                         ..sentenceIndex =
-  //                             scrollController.position.pixels.toInt());
-  //                     });
-  //                   });
-  //                 },
-  //                 icon: Icon(
-  //                   Icons.add,
-  //                 ),
-  //               )
-  //             ],
-  //           ),
-  //           Container(
-  //             child: SingleChildScrollView(
-  //               child: Column(
-  //                 children: [
-  //                   for (var bookmark in bookmarks.reversed)
-  //                     Row(
-  //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                         children: [
-  //                           GestureDetector(
-  //                             child: Text(
-  //                               "bookmark: ${bookmark.sentenceIndex}",
-  //                               style: TextStyle(color: Colors.white),
-  //                             ),
-  //                             onTap: () {
-  //                               scrollController
-  //                                   .jumpTo(bookmark.sentenceIndex.toDouble());
-  //                             },
-  //                           ),
-  //                           IconButton(
-  //                               onPressed: () {
-  //                                 // BookmarkController.deleteBookmark(bookmark.delete());
-  //                                 innerSetState(() {
-  //                                   setState(() {
-  //                                     bookmark.delete();
-  //                                     bookmarks.remove(bookmark);
-  //                                   });
-  //                                 });
-  //                               },
-  //                               icon: Icon(Icons.delete))
-  //                         ]),
-  //                 ],
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   PopupMenuItem ttsSpeedItem() {
     return PopupMenuItem(
@@ -543,74 +466,6 @@ class _ReadTextState extends State<ReadText> {
           ],
         ),
       ),
-    );
-  }
-
-  Future modalDefinitions(
-      List<Map<dynamic, dynamic>> definitions, String word) {
-    if (isTTsEnabled) tts.speak(word);
-    return showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return SingleChildScrollView(
-            child: Container(
-              color: Colors.grey[900],
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      word,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'LouisGeorgeCafe'),
-                    ),
-                  ),
-                  for (var i = 0; i < definitions.length; i++)
-                    definitionCard(definitions[i])
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
-  Widget definitionCard(Map<dynamic, dynamic> definition) {
-    String definitionFormated =
-        definition['definition'].toString().replaceAll('<br>', '');
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-      child: GestureDetector(
-          child: Card(
-            color: Colors.green,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 8, 18, 8),
-                child: Text(
-                  definitionFormated,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'LouisGeorgeCafe'),
-                ),
-              ),
-            ),
-          ),
-          onTap: () async {
-            //TODO: FIX ADDING WORLD (NO SENTENCE)
-            WordController.addWord(
-                selectedWord,
-                definitionFormated,
-                selectedSentence,
-                '[sound:${selectedWord + selectedSentence.split(' ').first}.mp3]');
-            Navigator.pop(context);
-          }),
     );
   }
 
