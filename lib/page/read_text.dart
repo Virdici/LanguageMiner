@@ -52,6 +52,8 @@ class _ReadTextState extends State<ReadText> {
   FocusNode focus = new FocusNode();
 
   late List<BookmarkModel> bookmarks;
+  CustomTextSelectionControls customTextSelectionControls =
+      CustomTextSelectionControls(modal: false);
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -117,83 +119,20 @@ class _ReadTextState extends State<ReadText> {
                 fontWeight: FontWeight.bold,
                 fontFamily: fontName),
             selectionEnabled: true,
-            selectionControls: CustomTextSelectionControls(modal: false),
+            selectionControls: customTextSelectionControls,
+            textScaleFactor: 1,
           ),
         ),
         controller: scrollController,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          // print(customTextSelectionControls.currentPosition);
+          print(scrollController.offset);
+        },
       ),
     );
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   scrollController = ScrollController()
-  //     ..addListener(() {
-  //       print(scrollController.offset);
-  //     });
-  //   return Scaffold(
-  //     appBar: PreferredSize(
-  //       child: appBar(),
-  //       preferredSize: Size.fromHeight(appBarSize),
-  //     ),
-  //     // linia 106 by naprawić jumpy przy zaznaczaniu poprzez przytrzymanie
-  //     body: SingleChildScrollView(
-  //       child: SelectableText(
-  //         content,
-  //         style: TextStyle(
-  //             color: Colors.white,
-  //             fontSize: fontSize,
-  //             fontWeight: FontWeight.bold,
-  //             fontFamily: fontName),
-  //         dragStartBehavior: DragStartBehavior.down,
-  //         selectionControls: FlutterSelectionControls(
-  //           toolBarItems: toolBarItems(),
-  //         ),
-  //       ),
-  //       controller: scrollController,
-  //     ),
-  //     floatingActionButton: FloatingActionButton(
-  //       onPressed: () {},
-  //     ),
-  //   );
-  // }
-
-  // List<ToolBarItem> toolBarItems() {
-  //   return [
-  //     ToolBarItem(
-  //         item: Text(
-  //           'Copy',
-  //         ),
-  //         itemControl: ToolBarItemControl.copy),
-  //     ToolBarItem(
-  //       item: Text(
-  //         'word',
-  //       ),
-  //       onItemPressed: (String highLightedText, int start, int end) async => {
-  //         selectedWord = highLightedText,
-  //         dictTerms = await DictController.getTerm(highLightedText),
-  //         modalDefinitions(dictTerms, highLightedText),
-  //       },
-  //     ),
-  //     ToolBarItem(
-  //       item: Text(
-  //         'translate',
-  //       ),
-  //       onItemPressed: (String highLightedText, int start, int end) async {
-  //         final AndroidIntent intent = AndroidIntent(
-  //             action: 'android.intent.action.TRANSLATE',
-  //             arguments: {
-  //               'android.intent.extra.PROCESS_TEXT': highLightedText,
-  //             },
-  //             package: 'com.google.android.apps.translate');
-  //         intent.launch();
-  //       },
-  //     ),
-  //   ];
-  // }
 
   AppBar appBar() {
     return AppBar(

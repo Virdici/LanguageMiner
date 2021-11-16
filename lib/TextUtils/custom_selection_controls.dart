@@ -28,7 +28,7 @@ class CustomTextSelectionControls extends TextSelectionControls {
   String selectedSentence = 'penis';
   late List<Map<dynamic, dynamic>> dictTerms;
   late Timer _timer;
-
+  int currentPosition = 0;
   @override
   Widget buildHandle(
       BuildContext context, TextSelectionHandleType type, double textLineHeight,
@@ -69,6 +69,60 @@ class CustomTextSelectionControls extends TextSelectionControls {
     }
   }
 
+  void handleTranslate(TextSelectionDelegate delegate) async {
+    selectedText = delegate.textEditingValue.text.substring(
+        delegate.textEditingValue.selection.start,
+        delegate.textEditingValue.selection.end);
+    if (modal == true) {
+      selectedTextModal = selectedText;
+    }
+    final AndroidIntent intent = AndroidIntent(
+      action: 'android.intent.action.TRANSLATE',
+      arguments: {
+        'android.intent.extra.PROCESS_TEXT': selectedText,
+      },
+    );
+    intent.launch();
+    delegate.hideToolbar();
+    delegate.userUpdateTextEditingValue(
+        delegate.textEditingValue
+            .copyWith(selection: const TextSelection.collapsed(offset: 0)),
+        SelectionChangedCause.toolBar);
+  }
+
+  void handleMine(TextSelectionDelegate delegate, BuildContext context) {
+    String highlightedText = delegate.textEditingValue.text.substring(
+        delegate.textEditingValue.selection.start,
+        delegate.textEditingValue.selection.end);
+
+    selectedText = highlightedText;
+
+    modalMiner(context, selectedText);
+
+    delegate.hideToolbar();
+    delegate.userUpdateTextEditingValue(
+        delegate.textEditingValue
+            .copyWith(selection: const TextSelection.collapsed(offset: 0)),
+        SelectionChangedCause.toolBar);
+  }
+
+  void handleAddWord(
+      TextSelectionDelegate delegate, BuildContext context) async {
+    String selectedText = delegate.textEditingValue.text.substring(
+        delegate.textEditingValue.selection.start,
+        delegate.textEditingValue.selection.end);
+
+    selectedWord = selectedText;
+    dictTerms = await DictController.getTerm(selectedWord);
+    modalDefinitions(context, dictTerms, selectedWord);
+
+    delegate.hideToolbar();
+    delegate.userUpdateTextEditingValue(
+        delegate.textEditingValue
+            .copyWith(selection: const TextSelection.collapsed(offset: 0)),
+        SelectionChangedCause.toolBar);
+  }
+
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -81,6 +135,12 @@ class CustomTextSelectionControls extends TextSelectionControls {
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
+    // print('new LINE WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW');
+    // print(selectionMidpoint.dx);
+    // print(selectionMidpoint.dy);
+    // print(delegate.textEditingValue.selection.start);
+    currentPosition = delegate.textEditingValue.selection.start;
+    // print(currentPosition);
     return _TextSelectionControlsToolbar(
       modal: modal,
       globalEditableRegion: globalEditableRegion,
@@ -96,56 +156,9 @@ class CustomTextSelectionControls extends TextSelectionControls {
       handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      handleTranslate: () async {
-        selectedText = delegate.textEditingValue.text.substring(
-            delegate.textEditingValue.selection.start,
-            delegate.textEditingValue.selection.end);
-        if (modal == true) {
-          selectedTextModal = selectedText;
-        }
-        final AndroidIntent intent = AndroidIntent(
-          action: 'android.intent.action.TRANSLATE',
-          arguments: {
-            'android.intent.extra.PROCESS_TEXT': selectedText,
-          },
-        );
-        intent.launch();
-        delegate.hideToolbar();
-        delegate.userUpdateTextEditingValue(
-            delegate.textEditingValue
-                .copyWith(selection: const TextSelection.collapsed(offset: 0)),
-            SelectionChangedCause.toolBar);
-      },
-      handleMine: () {
-        String highlightedText = delegate.textEditingValue.text.substring(
-            delegate.textEditingValue.selection.start,
-            delegate.textEditingValue.selection.end);
-
-        selectedText = highlightedText;
-
-        modalMiner(context, selectedText);
-
-        delegate.hideToolbar();
-        delegate.userUpdateTextEditingValue(
-            delegate.textEditingValue
-                .copyWith(selection: const TextSelection.collapsed(offset: 0)),
-            SelectionChangedCause.toolBar);
-      },
-      handleAddWord: () async {
-        String selectedText = delegate.textEditingValue.text.substring(
-            delegate.textEditingValue.selection.start,
-            delegate.textEditingValue.selection.end);
-
-        selectedWord = selectedText;
-        dictTerms = await DictController.getTerm(selectedWord);
-        modalDefinitions(context, dictTerms, selectedWord);
-
-        delegate.hideToolbar();
-        delegate.userUpdateTextEditingValue(
-            delegate.textEditingValue
-                .copyWith(selection: const TextSelection.collapsed(offset: 0)),
-            SelectionChangedCause.toolBar);
-      },
+      handleTranslate: () => handleTranslate(delegate),
+      handleMine: () => handleMine(delegate, context),
+      handleAddWord: () => handleAddWord(delegate, context),
     );
   }
 
