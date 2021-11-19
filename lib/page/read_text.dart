@@ -161,8 +161,7 @@ class _ReadTextState extends State<ReadText> {
             controller: scrollController,
           ),
         ),
-        //TODO fix flickering
-        onScaleUpdate: (details) {
+        onScaleStart: (details) {
           setState(() {
             if (appBarSize <= 0) {
               appBarSize = 50;
