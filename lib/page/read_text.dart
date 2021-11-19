@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'dart:async';
 import 'package:extended_text/extended_text.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -38,8 +39,8 @@ class _ReadTextState extends State<ReadText> {
   late String selectedWord;
   late String selectedSentence;
   ScrollController scrollController = new ScrollController();
+  ScrollController scrollControllerSupport = new ScrollController();
   double fontSize = 12;
-  double paddingSize = 0;
   int scrollPositionIndexed = 0;
   late Settings settings;
   double appBarSize = 50;
@@ -50,6 +51,19 @@ class _ReadTextState extends State<ReadText> {
   double ttsSpeed = 0;
   String clipboardBuffer = '';
   FocusNode focus = new FocusNode();
+  double paddingSize = 0;
+
+  double fontScale = 1;
+
+  //Font scales
+  double louisFS = 1;
+  double dislexicFS = 0.619132;
+  double dayromFS = 0.9013;
+
+  bool supportVisibility = false;
+
+  late double progress = 2.54;
+  late ExtendedText text;
 
   late List<BookmarkModel> bookmarks;
   CustomTextSelectionControls customTextSelectionControls =
@@ -86,7 +100,6 @@ class _ReadTextState extends State<ReadText> {
     settings.init().then((value) {
       setState(() {
         fontSize = settings.getfontSize();
-        paddingSize = settings.getPadding();
         scrollPositionIndexed = settings.getScrollPositionIndexed();
         fontName = settings.getFontFamily();
         isTTsEnabled = settings.getTts();
@@ -95,6 +108,18 @@ class _ReadTextState extends State<ReadText> {
     });
     tts.setLanguage('de');
     tts.setSpeechRate(0.8);
+    text = new ExtendedText(
+      content,
+      style: TextStyle(
+          color: Colors.white,
+          // fontSize: fontSize,
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          fontFamily: fontName),
+      selectionEnabled: true,
+      selectionControls: customTextSelectionControls,
+      textScaleFactor: fontScale,
+    );
   }
 
   @override
@@ -102,33 +127,48 @@ class _ReadTextState extends State<ReadText> {
     scrollController = ScrollController()
       ..addListener(() {
         // print(scrollController.offset);
+        setState(() {
+          double currentPos = scrollController.position.pixels;
+          double maxScroll = scrollController.position.maxScrollExtent;
+          double percentage = ((currentPos * 100) / maxScroll);
+          progress = percentage;
+        });
       });
+
+    ExtendedText? text = new ExtendedText(
+      content,
+      style: TextStyle(
+          color: Colors.white,
+          // fontSize: fontSize,
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          fontFamily: fontName),
+      selectionEnabled: true,
+      selectionControls: customTextSelectionControls,
+      textScaleFactor: fontScale,
+    );
+
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
         preferredSize: Size.fromHeight(appBarSize),
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: paddingSize),
-          child: ExtendedText(
-            content,
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                fontFamily: fontName),
-            selectionEnabled: true,
-            selectionControls: customTextSelectionControls,
-            textScaleFactor: 1,
+          child: SingleChildScrollView(
+            child: text,
+            controller: scrollController,
           ),
         ),
-        controller: scrollController,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // print(customTextSelectionControls.currentPosition);
-          print(scrollController.offset);
+        onScaleStart: (details) {
+          setState(() {
+            if (appBarSize <= 0) {
+              appBarSize = 50;
+            } else {
+              appBarSize = 0;
+            }
+          });
         },
       ),
     );
@@ -136,7 +176,13 @@ class _ReadTextState extends State<ReadText> {
 
   AppBar appBar() {
     return AppBar(
-        title: Text(titleController.text),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(titleController.text),
+            Text(progress.toStringAsPrecision(3) + ' /100%'),
+          ],
+        ),
         backgroundColor: Colors.grey[900],
         actions: [
           PopupMenuButton(
@@ -176,13 +222,18 @@ class _ReadTextState extends State<ReadText> {
               ),
               IconButton(
                 onPressed: () {
+                  double currentPos = scrollController.position.pixels;
+                  double maxScroll = scrollController.position.maxScrollExtent;
+                  double percentage = ((currentPos * 100) / maxScroll);
+
+                  print("percentage: " + (percentage).toString());
+
                   setState(() {
-                    BookmarkController.addBookmark(widget.text!.title,
-                        scrollController.position.pixels.toInt());
+                    BookmarkController.addBookmark(
+                        widget.text!.title, percentage);
                     bookmarks.add(BookmarkModel()
                       ..textTitle = widget.text!.title
-                      ..sentenceIndex =
-                          scrollController.position.pixels.toInt());
+                      ..sentenceIndex = percentage);
                   });
                 },
                 icon: Icon(
@@ -194,7 +245,10 @@ class _ReadTextState extends State<ReadText> {
           ValueListenableBuilder<Box<BookmarkModel>>(
             valueListenable: Hive.box<BookmarkModel>('bookmarks').listenable(),
             builder: (context, box, _) {
-              final bookmarks = box.values.toList().cast<BookmarkModel>();
+              final bookmarks = box.values
+                  .where((element) => element.textTitle == widget.text!.title)
+                  .toList()
+                  .cast<BookmarkModel>();
               return buildBookmarks(bookmarks);
             },
           )
@@ -203,7 +257,7 @@ class _ReadTextState extends State<ReadText> {
     );
   }
 
-  //TODO: different position on different font and padding settings
+  //
   Widget buildBookmarks(List<BookmarkModel> bookmarks) {
     if (bookmarks.isEmpty) {
       return Center(
@@ -232,11 +286,16 @@ class _ReadTextState extends State<ReadText> {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       GestureDetector(
         child: Text(
-          "bookmark: ${bookmark.sentenceIndex}",
+          "bookmark: ${bookmark.sentenceIndex.toStringAsPrecision(2)}%",
           style: TextStyle(color: Colors.white),
         ),
         onTap: () {
-          scrollController.jumpTo(bookmark.sentenceIndex.toDouble());
+          //TODO: Maybe add some adjustments?
+          double? position;
+          double maxScroll = scrollController.position.maxScrollExtent;
+
+          position = ((bookmark.sentenceIndex * maxScroll) / 100);
+          scrollController.jumpTo(position);
         },
       ),
       IconButton(
@@ -328,6 +387,19 @@ class _ReadTextState extends State<ReadText> {
               onChanged: (String? newValue) {
                 setState(() {
                   fontName = newValue!;
+                  switch (fontName) {
+                    case 'Dayrom':
+                      fontScale = dayromFS;
+                      break;
+                    case 'LouisGeorgeCafe':
+                      fontScale = louisFS;
+                      break;
+                    case 'OpenDyslexic':
+                      fontScale = dislexicFS;
+                      break;
+
+                    default:
+                  }
                   settings.setFontFamily(fontName);
                 });
               },
@@ -344,35 +416,6 @@ class _ReadTextState extends State<ReadText> {
                 },
               ).toList(),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PopupMenuItem paddingSizeItem() {
-    return PopupMenuItem(
-      child: StatefulBuilder(
-        builder: (context, innerSetState) => Column(
-          children: [
-            Text(
-              'Padding size: ${paddingSize.round()}',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-            Slider(
-              max: 64,
-              min: 0,
-              divisions: 8,
-              value: paddingSize,
-              onChanged: (value) {
-                innerSetState(() {
-                  setState(() {
-                    paddingSize = value;
-                    settings.setPadding(value);
-                  });
-                });
-              },
-            )
           ],
         ),
       ),
@@ -398,6 +441,35 @@ class _ReadTextState extends State<ReadText> {
                   setState(() {
                     fontSize = value;
                     settings.setfontSize(value);
+                  });
+                });
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem paddingSizeItem() {
+    return PopupMenuItem(
+      child: StatefulBuilder(
+        builder: (context, innerSetState) => Column(
+          children: [
+            Text(
+              'Padding size: ${paddingSize.round()}',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+            Slider(
+              max: 64,
+              min: 0,
+              divisions: 8,
+              value: paddingSize,
+              onChanged: (value) {
+                innerSetState(() {
+                  setState(() {
+                    paddingSize = value;
+                    settings.setPadding(value);
                   });
                 });
               },

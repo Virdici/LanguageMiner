@@ -6,7 +6,7 @@ class BookmarkController {
     bookmark.delete();
   }
 
-  static Future addBookmark(String title, int sentenceIndex) async {
+  static Future addBookmark(String title, double sentenceIndex) async {
     final bookmark = BookmarkModel()
       ..textTitle = title
       ..sentenceIndex = sentenceIndex;
@@ -24,6 +24,18 @@ class BookmarkController {
       return false;
     } else {
       return true;
+    }
+  }
+
+  static void deleteAllBookmarksOfTitle(String title) {
+    var box = Hive.box<BookmarkModel>('bookmarks');
+    var bookmarks = box.values
+        .where((element) => element.textTitle == title)
+        .cast<BookmarkModel>()
+        .toList();
+
+    for (var bookmark in bookmarks) {
+      bookmark.delete();
     }
   }
 }

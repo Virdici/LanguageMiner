@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:language_miner/Controllers/bookmarkController.dart';
 import 'package:language_miner/Controllers/textController.dart';
 import 'package:language_miner/model/textModel.dart';
 import 'package:language_miner/page/add_text.dart';
@@ -168,8 +169,10 @@ class _TextsPageState extends State<TextsPage> {
                 Icons.delete,
                 color: Colors.white,
               ),
-              //TODO: Delete with bookmarks
-              onPressed: () => TextController.deleteText(text),
+              onPressed: () => {
+                TextController.deleteText(text),
+                BookmarkController.deleteAllBookmarksOfTitle(text.title),
+              },
             ),
           )
         ],

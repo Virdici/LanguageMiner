@@ -111,4 +111,16 @@ class Settings {
     }
     return bookmarks;
   }
+
+  Future setBookmark(int position) async {
+    _sp.setInt('bookmark', position);
+  }
+
+  int getBookmark() {
+    int? position = _sp.getInt('bookmark');
+    if (position == null) {
+      position = 0;
+    }
+    return position;
+  }
 }

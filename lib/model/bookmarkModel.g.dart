@@ -18,7 +18,7 @@ class BookmarkModelAdapter extends TypeAdapter<BookmarkModel> {
     };
     return BookmarkModel()
       ..textTitle = fields[0] as String
-      ..sentenceIndex = fields[1] as int;
+      ..sentenceIndex = fields[2] as double;
   }
 
   @override
@@ -27,7 +27,7 @@ class BookmarkModelAdapter extends TypeAdapter<BookmarkModel> {
       ..writeByte(2)
       ..writeByte(0)
       ..write(obj.textTitle)
-      ..writeByte(1)
+      ..writeByte(2)
       ..write(obj.sentenceIndex);
   }
 
