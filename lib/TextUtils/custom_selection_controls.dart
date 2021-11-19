@@ -128,24 +128,17 @@ class CustomTextSelectionControls extends TextSelectionControls {
     BuildContext context,
     Rect globalEditableRegion,
     double textLineHeight,
-    // ignore: avoid_renaming_method_parameters
-    Offset selectionMidpoint,
+    Offset midpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
     ClipboardStatusNotifier clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    // print('new LINE WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW');
-    // print(selectionMidpoint.dx);
-    // print(selectionMidpoint.dy);
-    // print(delegate.textEditingValue.selection.start);
-    currentPosition = delegate.textEditingValue.selection.start;
-    // print(currentPosition);
     return _TextSelectionControlsToolbar(
       modal: modal,
       globalEditableRegion: globalEditableRegion,
       textLineHeight: textLineHeight,
-      selectionMidpoint: selectionMidpoint,
+      selectionMidpoint: midpoint,
       endpoints: endpoints,
       delegate: delegate,
       clipboardStatus: clipboardStatus,
@@ -162,6 +155,7 @@ class CustomTextSelectionControls extends TextSelectionControls {
     );
   }
 
+  //TODO: FINDING SENCENVE OF SELECTED WORD
   Future modalMiner(BuildContext context, String selectedText) async {
     checkClipboard();
     CustomTextSelectionControls modalSelectionControls =
@@ -481,10 +475,24 @@ class _TextSelectionControlsToolbarState
           padding: TextSelectionToolbarTextButton.getPadding(
               entry.key, itemDatas.length),
           onPressed: entry.value.onPressed,
-          child: Text(entry.value.label),
+          // child: Text(entry.value.label),
+          child: items(entry.value.label),
         );
       }).toList(),
     );
+  }
+
+  Widget items(String label) {
+    switch (label) {
+      case "Copy":
+        return Icon(Icons.copy);
+      case "Translate":
+        return Icon(Icons.translate);
+      case "Mine":
+        return Icon(Icons.history_edu);
+      default:
+        return Text(label);
+    }
   }
 }
 

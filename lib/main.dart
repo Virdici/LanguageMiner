@@ -20,6 +20,7 @@ void main() async {
       theme: ThemeData(
           primaryColor: Colors.grey[900],
           backgroundColor: Colors.black,
+          appBarTheme: AppBarTheme(backgroundColor: Colors.grey[900]),
           scaffoldBackgroundColor: Colors.black,
           bottomNavigationBarTheme: BottomNavigationBarThemeData(
               selectedItemColor: Colors.green[400],

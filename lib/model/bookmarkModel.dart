@@ -6,6 +6,6 @@ part 'bookmarkModel.g.dart';
 class BookmarkModel extends HiveObject {
   @HiveField(0)
   late String textTitle;
-  @HiveField(1)
-  late int sentenceIndex;
+  @HiveField(2)
+  late double sentenceIndex;
 }
