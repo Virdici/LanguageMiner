@@ -145,7 +145,6 @@ class CustomTextSelectionControls extends TextSelectionControls {
       delegate: delegate,
       clipboardStatus: clipboardStatus,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      //TODO: COPY DOESN'T WORK
       handleCopy: canCopy(delegate)
           ? () => handleCopy(delegate, clipboardStatus)
           : null,

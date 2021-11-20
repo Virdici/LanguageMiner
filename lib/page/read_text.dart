@@ -135,29 +135,28 @@ class _ReadTextState extends State<ReadText> {
         });
       });
 
-    ExtendedText? text = new ExtendedText(
-      content,
-      style: TextStyle(
-          color: Colors.white,
-          // fontSize: fontSize,
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold,
-          fontFamily: fontName),
-      selectionEnabled: true,
-      selectionControls: customTextSelectionControls,
-      textScaleFactor: fontScale,
-    );
-
     return Scaffold(
       appBar: PreferredSize(
         child: appBar(),
         preferredSize: Size.fromHeight(appBarSize),
       ),
+      //TODO: FIX HIDING APPBAR
       body: GestureDetector(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: paddingSize),
           child: SingleChildScrollView(
-            child: text,
+            child: ExtendedText(
+              content,
+              style: TextStyle(
+                  color: Colors.white,
+                  // fontSize: fontSize,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: fontName),
+              selectionEnabled: true,
+              selectionControls: customTextSelectionControls,
+              textScaleFactor: fontScale,
+            ),
             controller: scrollController,
           ),
         ),
@@ -180,7 +179,7 @@ class _ReadTextState extends State<ReadText> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(titleController.text),
-            Text(progress.toStringAsPrecision(2) + ' /100%'),
+            Text(progress.toStringAsFixed(2) + ' /100%'),
           ],
         ),
         backgroundColor: Colors.grey[900],
