@@ -21,7 +21,7 @@ class _TextDialogState extends State<AddTextDialog> {
   final formKey = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final contentsController = TextEditingController();
-
+  late bool isEditing;
   @override
   void initState() {
     super.initState();
@@ -44,7 +44,7 @@ class _TextDialogState extends State<AddTextDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.text != null;
+    isEditing = widget.text != null;
     final title = isEditing ? 'Edit text' : 'Add text';
 
     return returnDialog(title, context, isEditing);
@@ -86,11 +86,13 @@ class _TextDialogState extends State<AddTextDialog> {
             border: OutlineInputBorder(),
             hintText: 'Enter Title',
           ),
-          validator: (name) => name != null && name.isEmpty
-              ? 'Enter a title'
-              : TextController.checkIfExists(name!)
-                  ? 'Title already exists'
-                  : null,
+          validator: (name) => isEditing
+              ? null
+              : name != null && name.isEmpty
+                  ? 'Enter a title'
+                  : TextController.checkIfExists(name!)
+                      ? 'Title already exists'
+                      : null,
         ),
       );
 
