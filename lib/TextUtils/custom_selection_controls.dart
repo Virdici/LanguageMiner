@@ -157,7 +157,6 @@ class CustomTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  //TODO: FINDING SENCENVE OF SELECTED WORD
   Future modalMiner(BuildContext context, String selectedText) async {
     checkClipboard();
     CustomTextSelectionControls modalSelectionControls =

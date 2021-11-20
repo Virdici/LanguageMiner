@@ -62,7 +62,7 @@ class _ReadTextState extends State<ReadText> {
 
   bool supportVisibility = false;
 
-  late double progress = 2.54;
+  late double progress = 0;
   late ExtendedText text;
 
   late List<BookmarkModel> bookmarks;
@@ -89,6 +89,7 @@ class _ReadTextState extends State<ReadText> {
   void initState() {
     super.initState();
     initwordsBox();
+
     if (widget.text != null) {
       final text = widget.text!;
 
@@ -126,7 +127,6 @@ class _ReadTextState extends State<ReadText> {
   Widget build(BuildContext context) {
     scrollController = ScrollController()
       ..addListener(() {
-        // print(scrollController.offset);
         setState(() {
           double currentPos = scrollController.position.pixels;
           double maxScroll = scrollController.position.maxScrollExtent;
@@ -140,35 +140,23 @@ class _ReadTextState extends State<ReadText> {
         child: appBar(),
         preferredSize: Size.fromHeight(appBarSize),
       ),
-      //TODO: FIX HIDING APPBAR
-      body: GestureDetector(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: paddingSize),
-          child: SingleChildScrollView(
-            child: ExtendedText(
-              content,
-              style: TextStyle(
-                  color: Colors.white,
-                  // fontSize: fontSize,
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: fontName),
-              selectionEnabled: true,
-              selectionControls: customTextSelectionControls,
-              textScaleFactor: fontScale,
-            ),
-            controller: scrollController,
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: paddingSize),
+        child: SingleChildScrollView(
+          child: ExtendedText(
+            content,
+            style: TextStyle(
+                color: Colors.white,
+                // fontSize: fontSize,
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                fontFamily: fontName),
+            selectionEnabled: true,
+            selectionControls: customTextSelectionControls,
+            textScaleFactor: fontScale,
           ),
+          controller: scrollController,
         ),
-        onScaleStart: (details) {
-          setState(() {
-            if (appBarSize <= 0) {
-              appBarSize = 50;
-            } else {
-              appBarSize = 0;
-            }
-          });
-        },
       ),
     );
   }
@@ -289,7 +277,6 @@ class _ReadTextState extends State<ReadText> {
           style: TextStyle(color: Colors.white),
         ),
         onTap: () {
-          //TODO: Maybe add some adjustments?
           double? position;
           double maxScroll = scrollController.position.maxScrollExtent;
 
@@ -299,8 +286,6 @@ class _ReadTextState extends State<ReadText> {
       ),
       IconButton(
           onPressed: () {
-            // BookmarkController.deleteBookmark(bookmark.delete());
-
             setState(() {
               bookmark.delete();
               bookmarks.remove(bookmark);
