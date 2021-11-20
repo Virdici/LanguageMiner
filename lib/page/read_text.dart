@@ -180,7 +180,7 @@ class _ReadTextState extends State<ReadText> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(titleController.text),
-            Text(progress.toStringAsPrecision(3) + ' /100%'),
+            Text(progress.toStringAsPrecision(2) + ' /100%'),
           ],
         ),
         backgroundColor: Colors.grey[900],
