@@ -96,6 +96,8 @@ class CustomTextSelectionControls extends TextSelectionControls {
         delegate.textEditingValue.selection.end);
 
     selectedText = highlightedText;
+    ClipboardData data = ClipboardData(text: '');
+    Clipboard.setData(data);
 
     modalMiner(context, selectedText);
 
@@ -143,6 +145,7 @@ class CustomTextSelectionControls extends TextSelectionControls {
       delegate: delegate,
       clipboardStatus: clipboardStatus,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      //TODO: COPY DOESN'T WORK
       handleCopy: canCopy(delegate)
           ? () => handleCopy(delegate, clipboardStatus)
           : null,
@@ -188,7 +191,7 @@ class CustomTextSelectionControls extends TextSelectionControls {
                     SizedBox(height: 12),
                     Container(
                       child: TextFormField(
-                        // initialValue: clipboard,
+                        // initialValue: "Translation here",
                         maxLines: null,
                         onTap: () {
                           _timer.cancel();
