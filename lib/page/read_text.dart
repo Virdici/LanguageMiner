@@ -140,23 +140,31 @@ class _ReadTextState extends State<ReadText> {
         child: appBar(),
         preferredSize: Size.fromHeight(appBarSize),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: paddingSize),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingSize),
           child: ExtendedText(
             content,
             style: TextStyle(
                 color: Colors.white,
-                // fontSize: fontSize,
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
                 fontFamily: fontName),
             selectionEnabled: true,
             selectionControls: customTextSelectionControls,
             textScaleFactor: fontScale,
+            onTap: () {
+              setState(() {
+                if (appBarSize <= 0) {
+                  appBarSize = 50;
+                } else {
+                  appBarSize = 0;
+                }
+              });
+            },
           ),
-          controller: scrollController,
         ),
+        controller: scrollController,
       ),
     );
   }
